@@ -138,7 +138,7 @@
       : tone === "story"
         ? "Use the lesson only as far as your real experience supports it."
         : tone === "helpful"
-          ? "Start small, check the result, and adjust based on what you learn."
+          ? "Use what happened to decide on your next step."
           : "What is one realistic step you can take next?";
     const sections = [hook];
     if (second) sections.push(second);
@@ -194,8 +194,8 @@
     lessons.forEach((lesson, index) => {
       out += "\n\nLESSON " + (index + 1) + ": " + lesson[0] +
         "\nOutcome: " + lesson[1] +
-        "\nDemonstration: Work through one example related to " + topic + ", explaining the decision at each step." +
-        "\nPractice: Ask learners to complete one small step themselves and note where they got stuck." +
+        "\nDemonstration: " + demonstrationFor(topic) +
+        "\nPractice: " + practiceFor(topic) +
         "\nCheck: Ask learners to show or explain what they did, then compare it with the lesson outcome.";
     });
     return out + "\n\nFINAL PROJECT\nComplete one small real-world task related to " + topic + ". Include the starting point, the steps taken, the result, and one improvement for a second attempt." +
@@ -239,7 +239,7 @@
     return { script, caption: caption(thought), format, componentCount: components.length };
   }
   root.TTVContentEngine = {
-    version: "1.3.0", componentCount: components.length, components: components.slice(), generate,
+    version: "1.3.1", componentCount: components.length, components: components.slice(), generate,
     component: (family, seed) => component(clean(family), clean(seed)),
     caption: raw => caption(clean(raw)), video: (raw, tone, creator) => video(raw, tone, creator),
     course: (raw, full) => course(raw, full), story: (raw, tone) => story(raw, tone), lesson: raw => lesson(raw)
