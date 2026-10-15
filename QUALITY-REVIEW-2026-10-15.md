@@ -45,3 +45,23 @@ This is an internal, model-assisted review of the current generated outputs agai
 4. **Make captions launch-specific.** Preserve the original message and produce a relevant call to action without automatic generic hashtags.
 5. **Run real user tests.** Ask at least five creators to try their own ideas, then compare their edit time, faithfulness ratings, and willingness to publish against this baseline.
 
+
+
+## Follow-up changes — engine 1.3.1
+
+The next pass was implemented after the initial scores above:
+
+- Video scripts no longer include the generic reflection paragraph that often repeated the user's main point; a practical next action is used instead.
+- Course and mini-course lessons now use topic-aware demonstrations and practice tasks instead of repeating the same placeholder instructions in every lesson.
+- Story output is explicitly labelled **STORY BUILDER — COMPLETE WITH VERIFIED DETAILS** so users are less likely to mistake a guided template for a finished, fact-checked narrative.
+- The helpful-tone close was shortened to reduce overlap with the action section.
+- Automated tests now check story-builder labelling and concrete course demonstrations/practice.
+
+Latest GitHub Actions run for engine 1.3.1: https://github.com/akameredon/thought-to-video/actions/runs/38774565199
+
+- Smoke tests: passed.
+- Automated corpus cases: 12/12 passed.
+- Selected boilerplate phrase hits: 0.
+- Average video script length: 104 words, still below the rough 120–150-word guide for a 60-second video. This is a remaining improvement area, not something to solve by padding every script.
+
+The initial sample scores above are retained as the baseline and have not been re-scored after these changes. The manual quality gate therefore remains open.
