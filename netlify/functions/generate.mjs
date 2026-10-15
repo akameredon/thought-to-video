@@ -50,7 +50,7 @@ async function gemini(prompt) {
   // useful JSON error instead of timing out with a gateway HTTP 504.
   const deadline = Date.now() + 6500;
   const preferred = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-  const models = [...new Set([preferred, "gemini-3.6-flash", "gemini-3.5-flash-lite"])];
+  const models = [...new Set([preferred, "gemini-3.5-flash-lite", "gemini-3.6-flash"])];
   const failures = [];
 
   for (const model of models) {
@@ -68,7 +68,7 @@ async function gemini(prompt) {
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), Math.max(1000, remaining - 150));
+      const timeout = setTimeout(() => controller.abort(), Math.max(900, Math.min(2200, remaining - 150)));
       let response;
       try {
         response = await fetch(url, {
