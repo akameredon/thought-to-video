@@ -256,7 +256,7 @@
     return "Worked example: choose a small, real case related to the idea. State the starting information, explain each decision, show the result, and point out one assumption the learner should verify.";
   }
   function lesson(thought) {
-    const idea = clean(thought);
+    const idea = clean(thought).replace(/[.!?]+$/, "");
     return "LESSON: " + idea +
       "\n\nLEARNING GOAL\nBy the end, learners should be able to explain the idea and complete one small task connected to it." +
       "\n\nEXPLAIN\nAsk learners what they already know. Define the central idea in plain language and connect it to a situation they recognise: " + idea + "." +
@@ -280,7 +280,7 @@
     return { script, caption: caption(thought), format, componentCount: components.length };
   }
   root.TTVContentEngine = {
-    version: "1.4.1", componentCount: components.length, components: components.slice(), generate,
+    version: "1.4.2", componentCount: components.length, components: components.slice(), generate,
     component: (family, seed) => component(clean(family), clean(seed)),
     caption: raw => caption(clean(raw)), video: (raw, tone, creator) => video(raw, tone, creator),
     course: (raw, full) => course(raw, full), story: (raw, tone) => story(raw, tone), lesson: raw => lesson(raw)
