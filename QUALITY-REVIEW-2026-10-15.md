@@ -6,7 +6,7 @@ Corpus: 12 representative prompts across video, story, lesson, mini-course, full
 
 ## Scope and limitation
 
-This is an internal, model-assisted review of the current generated outputs against the repository's 40-point rubric. It is useful for prioritising fixes, but it is not a substitute for testing with real creators or getting an independent human reviewer. Scores are provisional and should be repeated after the next revision.
+This is an internal, model-assisted review of the current generated outputs against the repository's 40-point rubric. It is useful for prioritising fixes, but it is not a substitute for testing with real creators or getting an independent human reviewer. Scores are provisional baseline scores from the first pass of this review, before the final topic-routing and course-outline edits in the commit sequence. They should be repeated against the latest commit before any release decision.
 
 ## Sample scores
 
