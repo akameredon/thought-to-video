@@ -76,15 +76,14 @@
     const lower = idea.toLowerCase();
     if (/\b(whatsapp|customer|client|sales|business|product|service|shop)\b/.test(lower))
       return "For a shop using WhatsApp status, post one product photo with its price, availability, and a clear way to order. Track which questions customers ask so tomorrow's post answers a real question.";
-    if (/\b(money|saving|budget|spend|income|cost|price|pricing|profit|bill)\b/.test(lower))
+    if (/\b(consisten|schedule|every day|posting)\b/.test(lower))
+      return "If daily posting is unrealistic, choose two repeatable days each week and prepare a small batch in advance. Keep the schedule only if you can maintain useful quality without exhausting yourself.";
+    if (/\b(money|saving|budget|spend|income|price|pricing|profit|bill|expenses?)\b/.test(lower))
       return "For a simple weekly money review, write down each expense for seven days, group essentials separately from optional spending, then choose one change you can realistically keep. Do not set a savings target until you know what is left after essential bills.";
     if (/\b(ai|programmer|prompt|technology)\b/.test(lower))
       return "Instead of asking an AI tool to 'help with my business', describe one real task, the audience, the constraints, and the format you need. Then verify names, figures, and claims before using its answer.";
-    if (/\b(consisten|schedule|every day|posting)\b/.test(lower))
-      return "If daily posting is unrealistic, choose two repeatable days each week and prepare a small batch in advance. Keep the schedule only if you can maintain useful quality without exhausting yourself.";
     if (/\b(content|post|video|creator|audience|social media)\b/.test(lower))
       return "For a local business, plan one post that answers a customer question, one that demonstrates the product, and one that explains how to buy. Put each on the calendar only if it serves a clear audience need.";
-      return "If daily posting is unrealistic, choose two repeatable days each week and prepare a small batch in advance. Keep the schedule only if you can maintain useful quality without exhausting yourself.";
     if (/\b(movement|progress|focus|task|plan|time)\b/.test(lower))
       return "Before opening messages or tutorials, write down the one deliverable that would make today successful. Work on it for a protected 25-minute block, then record whether the deliverable moved forward.";
     if (/\b(freelancer|deadline|revision|scope|payment)\b/.test(lower))
@@ -193,8 +192,8 @@
     return "LESSON: " + idea +
       "\n\nLEARNING GOAL\nBy the end, learners should be able to explain the idea and complete one small task connected to it." +
       "\n\nEXPLAIN\nAsk learners what they already know. Define the central idea in plain language and connect it to a situation they recognise: " + idea + "." +
-      "\n\nDEMONSTRATE\nWork through one example related to the idea. Say why you choose each step, and point out one common mistake without assuming every learner will face the same problem." +
-      "\n\nPRACTISE\nGive learners a small version of the task to complete themselves. Ask them to write down the step they took and the result they observed." +
+      "\n\nDEMONSTRATE\n" + demonstrationFor(idea) + "\nExplain why each step matters and identify one common mistake to avoid." +
+      "\n\nPRACTISE\n" + practiceFor(idea) +
       "\n\nCHECK UNDERSTANDING\nAsk learners to explain the idea in their own words, demonstrate the first step, and say how they would know whether it worked." +
       "\n\nRECAP\nSummarise the main point in one sentence. End by asking learners to choose one realistic next action and identify what support they may need.";
   }
