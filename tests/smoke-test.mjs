@@ -67,7 +67,7 @@ controls.thought.value = "I want to explain why saving money matters.";
 await controls.generate.onclick();
 assert.equal(fetchCalls, 2, "a second valid idea should retry the server endpoint");
 assert.ok(controls.outputHint.textContent.includes("without an AI API"), "provider failure should switch to the on-device writer");
-assert.ok(controls.script.value.includes("realistic example"), "offline script should include a practical example");
+assert.ok(controls.script.value.includes("For example, take the idea"), "offline script should include a practical example");
 assert.ok(controls.caption.value.includes("#ThoughtToVideo"), "offline mode should create a caption");
 
 controls.thought.value = "   ";
