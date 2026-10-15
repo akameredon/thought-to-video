@@ -245,12 +245,22 @@
         : "If you want this to become a personal story, add the real people, moment, and decision behind the idea. Until then, present it as a reflection, not a claimed personal experience.") +
       "\n\nOPTIONAL DELIVERY NOTE\n" + (tone === "bold" ? "Keep the delivery direct; pause after the main lesson." : tone === "helpful" ? "Explain the lesson slowly and give the audience one practical step." : "Use your everyday speaking voice and leave space after the key point.");
   }
+  function lessonWorkedExample(idea) {
+    const lower = idea.toLowerCase();
+    if (/price|pricing|service|freelance|cost/.test(lower))
+      return "Worked example: suppose a service costs 4,000 in direct expenses and takes 3 hours. If the provider values their time at 2,000 per hour, the starting cost calculation is 4,000 + (3 × 2,000) = 10,000 before taxes, overhead, or profit. This is an illustration, not a market price; replace it with your own figures and check what the offer includes.";
+    if (/budget|spending|saving|income|bills|money/.test(lower))
+      return "Worked example: list the income you actually expect, subtract essential bills due before the next income date, and treat the remainder as a planning figure rather than money automatically available to spend. Use confirmed amounts and leave unknowns clearly marked.";
+    if (/freelancer|deadline|revision|scope|payment/.test(lower))
+      return "Worked example: 'I will deliver one edited 60-second video by Friday. The price includes one revision. Work begins after the agreed deposit; additional edits or new deliverables will be quoted separately.' Adjust the terms to the actual agreement and local law.";
+    return "Worked example: choose a small, real case related to the idea. State the starting information, explain each decision, show the result, and point out one assumption the learner should verify.";
+  }
   function lesson(thought) {
     const idea = clean(thought);
     return "LESSON: " + idea +
       "\n\nLEARNING GOAL\nBy the end, learners should be able to explain the idea and complete one small task connected to it." +
       "\n\nEXPLAIN\nAsk learners what they already know. Define the central idea in plain language and connect it to a situation they recognise: " + idea + "." +
-      "\n\nDEMONSTRATE\n" + demonstrationFor(idea) + "\nExplain why each step matters and identify one common mistake to avoid." +
+      "\n\nDEMONSTRATE\n" + demonstrationFor(idea) + "\n" + lessonWorkedExample(idea) + "\nExplain why each step matters and identify one common mistake to avoid." +
       "\n\nPRACTISE\n" + practiceFor(idea) +
       "\n\nCHECK UNDERSTANDING\nAsk learners to explain the idea in their own words, demonstrate the first step, and say how they would know whether it worked." +
       "\n\nRECAP\nSummarise the main point in one sentence. End by asking learners to choose one realistic next action and identify what support they may need.";
@@ -270,7 +280,7 @@
     return { script, caption: caption(thought), format, componentCount: components.length };
   }
   root.TTVContentEngine = {
-    version: "1.4.0", componentCount: components.length, components: components.slice(), generate,
+    version: "1.4.1", componentCount: components.length, components: components.slice(), generate,
     component: (family, seed) => component(clean(family), clean(seed)),
     caption: raw => caption(clean(raw)), video: (raw, tone, creator) => video(raw, tone, creator),
     course: (raw, full) => course(raw, full), story: (raw, tone) => story(raw, tone), lesson: raw => lesson(raw)
