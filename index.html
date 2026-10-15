@@ -4,44 +4,13 @@
 <section class="panel" id="create"><div class="heading"><span class="step">01</span><div><h2>What’s on your mind?</h2><p>Write it as you’d say it to a friend.</p></div></div><textarea id="thought" rows="6" placeholder="I’ve been trying to grow my business, but…"></textarea><div class="fields"><div class="field"><label for="contentType">I want to create</label><select id="contentType"><option value="video">A short video script</option><option value="mini">A simple mini-course</option><option value="course">A complete course outline</option></select></div><div class="field"><label for="business">I’m creating as</label><select id="business"><option>Small business owner</option><option>Creator or coach</option><option>Freelancer</option><option>Educator</option><option>Personal brand</option></select></div><div class="field"><label for="tone">Make it sound</label><select id="tone"><option value="natural">Natural and honest</option><option value="bold">Bold and confident</option><option value="helpful">Helpful and practical</option><option value="story">Like a personal story</option></select></div></div><div class="actions"><button id="dictate" class="btn secondary">🎙 Dictate thought</button><button id="generate" class="btn primary">Build my content ↗</button></div><p class="note" id="voiceStatus">You can type or use your device’s voice input.</p></section>
 <section class="panel hidden" id="scriptPanel"><div class="heading"><span class="step">02</span><div><h2 id="outputTitle">Your talking script</h2><p id="outputHint">Edit anything that doesn’t sound like you.</p></div></div><textarea id="script" rows="8"></textarea><div class="meta"><span id="count">0 words · about 0 seconds</span><button id="copy" class="textbtn">Copy script</button></div><div class="field"><label for="caption">Social caption</label><textarea id="caption" rows="3"></textarea></div><div class="actions"><button id="edit" class="btn secondary">← Edit thought</button><button id="openRecord" class="btn primary">Open teleprompter ↗</button></div><p class="note">AI can enhance your draft when available. If every provider is down or you are offline, the built-in writer still creates a draft.</p></section>
 <section class="panel hidden" id="recordPanel"><div class="heading"><span class="step">03</span><div><h2>Record your video</h2><p>Place your phone at eye level and speak naturally.</p></div></div><div class="camera"><video id="camera" autoplay playsinline muted></video><div id="placeholder" class="placeholder">◉<br>Your camera preview will appear here.</div><div id="recBadge" class="hidden" style="position:absolute;top:12px;left:12px;background:#111c;padding:6px 9px;border-radius:8px">🔴 REC <span id="timer">00:00</span></div></div><div class="camera-controls"><button id="enableCamera" class="btn secondary">Enable camera & mic</button><button id="flip" class="btn secondary" disabled>Flip camera</button></div><div class="prompter"><div class="prompter-head"><span>TELEPROMPTER</span><div><button id="slower" aria-label="Slower">−</button> <button id="faster" aria-label="Faster">+</button></div></div><div id="prompterText" class="prompter-text">Your script will appear here.</div><div class="speed"><label for="speed">Scroll speed</label><input id="speed" type="range" min="1" max="5" value="2"></div></div><div class="actions"><button id="start" class="btn primary" disabled>● Start recording</button><button id="stop" class="btn danger hidden">Stop recording</button></div><div id="result" class="recording hidden"><h3>Your recording is ready</h3><video id="playback" controls playsinline></video><a id="download" class="btn primary" download="thought-to-video.webm">Save video</a><p class="note">Saving and video formats vary by browser. Test on your iPhone before relying on it.</p></div><button id="backScript" class="textbtn">← Back to script</button></section><div class="privacy">🔒 Drafts stay on this device. This starter version does not upload your thoughts or recordings.</div><footer>Built for people with something worth saying.</footer></main>
+<script src="./content-engine.js"></script>
 <script>
 const $=id=>document.getElementById(id);let stream=null,recorder=null,chunks=[],url=null,facing="user",installPrompt=null,scrollTimer=null,recInterval=null,started=0,scrollSpeed=2;const KEY="ttv-draft-v1";
 function clean(s){return s.replace(/\s+/g," ").trim()}function sentences(s){return(s.match(/[^.!?]+[.!?]?/g)||[s]).map(x=>x.trim()).filter(Boolean)}function words(s){const a=clean(s).match(/\b[\p{L}\p{N}'’-]+\b/gu);return a?a.length:0}
-function build(raw,tone){
- const idea=clean(raw), parts=sentences(idea), first=(parts[0]||idea).replace(/[.!?]+$/,""), rest=parts.slice(1).join(" ");
- const hooks={
-  natural:"There’s something about this worth thinking through.",
-  bold:"Here’s the point I don’t want us to miss.",
-  helpful:"Let’s make this idea practical.",
-  story:"Let me start with the thought that has been on my mind."
- };
- const endings={
-  natural:"The point is not to have everything figured out today. It is to understand the idea clearly enough to take one useful next step. What would that step look like for you?",
-  bold:"You do not need a perfect plan before you begin. Identify the next useful action, do it, and learn from what happens. What is one step you can take?",
-  helpful:"Try this: write down the problem, choose one small action you can take, and decide how you will know whether it helped. Keep it simple and adjust as you learn.",
-  story:"I’m sharing the thought, not pretending I have every answer. Sometimes putting an idea into words is the first step toward doing something useful with it. How do you see it?"
- };
- const body=parts.length>1?rest:"The useful thing is to slow down and look at what this idea actually means in everyday life. Instead of trying to solve everything at once, break it into smaller parts and focus on what you can influence.";
- const example="For example, take the idea you are dealing with and ask three questions: what is happening, why does it matter, and what is one realistic action you can take next? That turns a vague thought into something you can work with.";
- return (parts.length>=3?first+".\n\n"+rest:hooks[tone]||hooks.natural+"\n\n"+first+".\n\n"+body)+"\n\n"+example+"\n\n"+(endings[tone]||endings.natural)
-}
-function offlineCaption(raw){
- const topic=clean(raw).replace(/[.!?]+$/,"");
- const short=topic.length>130?topic.slice(0,127).trim()+"…":topic;
- return short+"\n\nA thought worth sharing—and a reminder to turn ideas into practical next steps.\n\nWhat’s your take? Share it in the comments.\n\n#ThoughtToVideo #ContentCreation";
-}
-function courseContent(raw,full){const topic=clean(raw).replace(/[.!?]+$/,"");const lessons=full?[
-["Start here: understand "+topic,"Explain the problem in plain language, who it affects, and what learners will be able to do by the end."],
-["The basic building blocks","Introduce the few tools, materials, or ideas learners need. Define unfamiliar words and show a simple example."],
-["Follow a step-by-step process","Demonstrate the process from beginning to end. Break it into small actions learners can copy."],
-["Make a real example","Work through one realistic example. Show common mistakes and how to correct them."],
-["Practise independently","Give learners a guided task, a checklist, and a clear standard for success."],
-["Turn the skill into a repeatable system","Show how to repeat the process, improve quality, and decide what to do next."]
-]:[
-["Understand the basics","Explain the idea in simple terms and show why it matters."],
-["Follow the steps","Demonstrate a beginner-friendly process from start to finish."],
-["Try it yourself","Walk through an example, point out mistakes, and give learners a short practice task."]
-];let out="COURSE IDEA\n"+topic+"\n\nWHO IT IS FOR\nBeginners who want a clear, practical way to understand and apply this idea.\n\nPROMISE\nBy the end, learners should be able to explain the key idea and complete a first practical attempt themselves.\n\n"+(full?"COURSE OUTLINE":"MINI-COURSE OUTLINE")+"\n";lessons.forEach((l,i)=>{out+="\nLESSON "+(i+1)+": "+l[0]+"\nWhat to teach: "+l[1]+"\nExample: Demonstrate the lesson using an ordinary, realistic situation.\nLearner task: Ask learners to do this step themselves and note what happened.\n"});out+="\nFINAL PROJECT\nAsk learners to use the steps to produce one small result they can show or use.\n\nCHECK FOR UNDERSTANDING\n1. What is the main idea?\n2. Which steps would you follow first?\n3. What would you do if you got stuck?\n\nCREATOR NOTE\nReplace the example with one from your own experience. Keep each lesson focused on one outcome, demonstrate rather than only explain, and avoid promising results that cannot be guaranteed.";return out}
+function build(raw,tone){return window.TTVContentEngine.video(raw,tone,$("business").value)}
+function offlineCaption(raw){return window.TTVContentEngine.caption(raw)}
+function courseContent(raw,full){return window.TTVContentEngine.course(raw,full)}
 
 function updateCount(){const n=words($("script").value);$("count").textContent=n+" words · about "+Math.max(1,Math.round(n/2.4))+" seconds";$("prompterText").textContent=$("script").value||"Your script will appear here."}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({thought:$("thought").value,script:$("script").value,caption:$("caption").value,tone:$("tone").value,business:$("business").value,contentType:$("contentType").value}))}catch{}}
