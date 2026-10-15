@@ -1,5 +1,5 @@
-const CACHE = "thought-to-video-v4";
-const ASSETS = ["./", "./index.html", "./manifest.json"];
+const CACHE = "thought-to-video-v5";
+const ASSETS = ["./", "./index.html", "./content-engine.js", "./manifest.json"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE)
     .then(cache => cache.addAll(ASSETS))
