@@ -37,7 +37,7 @@ for (const item of corpus) {
     "Demonstrate the lesson using an ordinary, realistic situation."
   ];
   const genericPhraseHits = genericLines.filter(phrase => lower.includes(phrase.toLowerCase())).length;
-  const videoMarkers = ["For a shop using WhatsApp status", "For a simple weekly money review", "Instead of asking an AI tool", "If daily posting is unrealistic", "For a local business", "Before opening messages or tutorials", "Before starting a freelance job", "Residents could agree on a collection day", "Choose one real situation where this idea applies"];
+  const videoMarkers = ["For a shop using WhatsApp status", "For a simple weekly money review", "Instead of asking an AI tool", "If daily posting is unrealistic", "For a local business", "Before opening messages or tutorials", "Before starting a freelance job", "Residents could agree on a collection day", "Choose one real situation where this idea applies", "For example, if you are learning a new skill"];
   const missingConcreteExample = item.format === "video" && !videoMarkers.some(marker => text.includes(marker));
   const passed = text.length > 40 && missingIdeaTerms.length === 0 && missingSections.length === 0 && genericPhraseHits === 0 && !missingConcreteExample;
   rows.push({ id: item.id, format: item.format, words, passed, missingIdeaTerms, missingSections, genericPhraseHits });
