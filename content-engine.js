@@ -29,7 +29,9 @@
     if (!topic) return "";
     const first = sentences(topic)[0] || topic;
     const lower = topic.toLowerCase();
-    const prompt = /\b(price|pricing|cost|money|saving|budget|spend|income|profit)\b/.test(lower)
+    const prompt = /\b(launch|launching|guide|ebook|e-book|course|offer|available now)\b/.test(lower)
+      ? "If this is a launch, tell the intended audience exactly what they will get and give them one clear next step."
+      : /\b(price|pricing|cost|money|saving|budget|spend|income|profit)\b/.test(lower)
       ? "Try this: review one real expense or money decision this week, using your actual numbers."
       : /\b(business|customer|client|sales|product|service|shop|whatsapp)\b/.test(lower)
         ? "Try this: choose one customer question and make your next post answer it clearly."
@@ -123,6 +125,22 @@
       return "At the end, look at what actually changed. A short review helps separate meaningful progress from activity that only felt productive.";
     return "Pause and check the idea against a real situation. What evidence would tell you it helped, and what would you change if the first attempt did not work?";
   }
+  function supportingDetail(idea) {
+    const lower = idea.toLowerCase();
+    if (/\b(ai|programmer|prompt|technology)\b/.test(lower))
+      return "A clear prompt narrows the task; a quick fact-check catches confident mistakes before they reach a customer or audience.";
+    if (/\b(whatsapp|customer|client|sales|business|product|shop)\b/.test(lower))
+      return "A useful status answers a real customer question; posting more often is not helpful if people still cannot tell what is available or how to order.";
+    if (/\b(money|saving|budget|spending|income|cost|price|pricing|profit|expenses?|bills)\b/.test(lower))
+      return "Seven days gives you a first snapshot, not a complete financial picture. Use the record as a starting point and avoid setting a target from guesses.";
+    if (/\b(consisten|schedule|every day|posting)\b/.test(lower))
+      return "A smaller schedule you can sustain is more useful than a demanding schedule you abandon after a week.";
+    if (/\b(movement|progress|focus|task|plan|time)\b/.test(lower))
+      return "A finished deliverable gives you something to evaluate. A full inbox or a long list of watched tutorials does not prove the important task moved forward.";
+    if (/\b(content|post|video|creator|audience|social media)\b/.test(lower))
+      return "Before publishing, check that the message answers one audience need and that every price, promise, and detail is accurate.";
+    return "Keep the example small enough to try, then use the result—not guesswork—to decide what to change.";
+  }
   function video(thought, tone, creator) {
     const idea = clean(thought);
     if (!idea) return "";
@@ -146,7 +164,7 @@
     const sections = [hook];
     if (second) sections.push(second);
     sections.push(demonstrationFor(idea));
-    sections.push(actionLine(idea));
+    sections.push(supportingDetail(idea));
     if (creatorLine) sections.push(creatorLine);
     sections.push(close);
     return sections.join("\n\n");
