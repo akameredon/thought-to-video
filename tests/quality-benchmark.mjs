@@ -46,6 +46,11 @@ for (const item of corpus) {
   assert.deepEqual(missingSections, [], item.id + ": required format structure is missing");
   assert.equal(genericPhraseHits, 0, item.id + ": known boilerplate phrase remains");
   assert.equal(missingConcreteExample, false, item.id + ": video must contain a concrete, topic-aware example");
+  if (item.format === "story") assert.ok(text.includes("STORY BUILDER"), item.id + ": story template must be clearly labelled as a builder");
+  if (item.format === "mini" || item.format === "course") {
+    assert.ok(text.includes("Demonstration: For ") || text.includes("Demonstration: Instead of ") || text.includes("Demonstration: If "), item.id + ": course must include a concrete demonstration");
+    assert.ok(text.includes("Practice: "), item.id + ": course must include a practice task");
+  }
   if (item.format === "caption") {
     assert.ok(text.toLowerCase().includes("small businesses"), "caption should preserve the user's specific audience");
     assert.ok(!text.includes("…"), "caption should not silently truncate the user's idea");
@@ -55,7 +60,7 @@ const videoRows = rows.filter(row => row.format === "video");
 const avgVideoWords = videoRows.reduce((sum, row) => sum + row.words, 0) / Math.max(1, videoRows.length);
 const passRate = rows.filter(row => row.passed).length / rows.length;
 console.log(JSON.stringify({
-  benchmarkVersion: "1.2.0",
+  benchmarkVersion: "1.3.1",
   engineVersion: engine.version,
   componentCount: engine.componentCount,
   corpusCases: corpus.length,
