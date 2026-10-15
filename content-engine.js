@@ -71,6 +71,20 @@
       return "Define what a finished result looks like before you begin. Protect a short block of focused time, then compare the result with that definition instead of measuring activity alone.";
     return "Choose one action that follows directly from this idea. Keep it small, decide what a useful result would look like, and review what happened before choosing the next step.";
   }
+  function reflectionLine(idea) {
+    const lower = idea.toLowerCase();
+    if (/\b(money|saving|budget|spend|income|cost|price|pricing|profit)\b/.test(lower))
+      return "You do not need to change everything at once. Compare what you planned with what actually happened, then use that evidence to make the next decision.";
+    if (/\b(whatsapp|customer|client|sales|business|product|service|shop)\b/.test(lower))
+      return "The goal is not to do more for its own sake. Make the message clear, then notice whether people understand the offer, ask better questions, or take the next step.";
+    if (/\b(learn|learning|teach|student|skill|course|practice|practise|AI|programmer)\b/.test(lower))
+      return "A useful sign of progress is being able to do the task with less help, not simply recognising the words or finishing a lesson.";
+    if (/\b(content|post|video|creator|audience|social media)\b/.test(lower))
+      return "A useful test is whether someone in that audience can repeat the main point and understand what they could do with it.";
+    if (/\b(time|focus|progress|task|plan|consistent|consistency)\b/.test(lower))
+      return "At the end, look at what actually changed. A short review helps separate meaningful progress from activity that only felt productive.";
+    return "Pause and check the idea against a real situation. What evidence would tell you it helped, and what would you change if the first attempt did not work?";
+  }
   function video(thought, tone, creator) {
     const idea = clean(thought);
     if (!idea) return "";
@@ -96,6 +110,7 @@
     if (second) sections.push(second);
     else sections.push("The important thing is to connect the idea to a real situation, not leave it as a slogan.");
     sections.push("For example, " + action.charAt(0).toLowerCase() + action.slice(1));
+    sections.push(reflectionLine(idea));
     if (creatorLine) sections.push(creatorLine);
     sections.push(close);
     return sections.join("\n\n");
