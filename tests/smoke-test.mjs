@@ -24,6 +24,7 @@ const controls = Object.fromEntries(ids.map(id => [id, {
   scrollIntoView() {}, addEventListener() {}
 }]));
 let fetchCalls = 0;
+let failAI = false;
 let sentBody;
 const alerts = [];
 runInNewContext(scriptMatch[1].split("const SR=")[0], {
@@ -37,12 +38,15 @@ runInNewContext(scriptMatch[1].split("const SR=")[0], {
     fetchCalls++;
     sentBody = JSON.parse(options.body);
     return {
-      ok: true,
-      text: async () => JSON.stringify({
-        script: "Education helps people learn.",
-        caption: "A simple, useful caption.",
-        provider: "Gemini"
-      })
+      ok: !failAI,
+      status: failAI ? 502 : 200,
+      text: async () => JSON.stringify(failAI
+        ? { error: "Providers unavailable" }
+        : {
+            script: "Education helps people learn.",
+            caption: "A simple, useful caption.",
+            provider: "Gemini"
+          })
     };
   }
 });
@@ -58,13 +62,21 @@ assert.equal(controls.count.textContent, "4 words · about 2 seconds", "word cou
 assert.equal(controls.prompterText.textContent, "Education helps people learn.", "teleprompter should match the script");
 assert.equal(controls.outputHint.textContent.includes("about 60 seconds"), true, "video output should show its intended duration");
 
+failAI = true;
+controls.thought.value = "I want to explain why saving money matters.";
+await controls.generate.onclick();
+assert.equal(fetchCalls, 2, "a second valid idea should retry the server endpoint");
+assert.ok(controls.outputHint.textContent.includes("without an AI API"), "provider failure should switch to the on-device writer");
+assert.ok(controls.script.value.includes("realistic example"), "offline script should include a practical example");
+assert.ok(controls.caption.value.includes("#ThoughtToVideo"), "offline mode should create a caption");
+
 controls.thought.value = "   ";
 await controls.generate.onclick();
-assert.equal(fetchCalls, 1, "empty input must not call the AI endpoint");
+assert.equal(fetchCalls, 2, "empty input must not call the AI endpoint");
 assert.ok(controls.thought.focused, "empty input should focus the thought field");
 assert.deepEqual(alerts, [], "valid input should not trigger error alerts");
 
-console.log("Smoke tests passed: syntax, unique IDs, AI generation, whitespace cleanup, word count, caption, teleprompter, and empty input.");
+console.log("Smoke tests passed: syntax, unique IDs, AI generation, offline fallback, whitespace cleanup, word count, captions, teleprompter, and empty input.");
 
 const handlers = {};
 const cachedPage = { offline: true };
