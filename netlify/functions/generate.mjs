@@ -46,52 +46,56 @@ async function gemini(prompt) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("Gemini is not configured");
 
-  // If the configured/default model is unavailable or overloaded, try other
-  // current, lightweight Gemini models before falling through to another provider.
+  // Keep the Gemini work inside a short time budget so Netlify can return a
+  // useful JSON error instead of timing out with a gateway HTTP 504.
+  const deadline = Date.now() + 6500;
   const preferred = process.env.GEMINI_MODEL || "gemini-3.8-flash";
   const models = [...new Set([preferred, "gemini-3.6-flash", "gemini-3.5-flash-lite"])];
   const failures = [];
 
   for (const model of models) {
+    const remaining = deadline - Date.now();
+    if (remaining < 1200) {
+      failures.push("remaining time budget exhausted before trying every model");
+      break;
+    }
+
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
     const body = JSON.stringify({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
     });
 
-    let response;
-    for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), Math.max(1000, remaining - 150));
+      let response;
       try {
         response = await fetch(url, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body
+          body,
+          signal: controller.signal
         });
-      } catch (error) {
-        failures.push(`${model}: network request failed`);
-        response = null;
-        break;
+      } finally {
+        clearTimeout(timeout);
       }
-      if (response.ok || ![429, 500, 502, 503, 504].includes(response.status) || attempt === 2) break;
-      await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
-    }
 
-    if (!response) continue;
-    if (!response.ok) {
-      failures.push(`${model}: HTTP ${response.status}`);
-      // Try the next model if this one is unavailable or temporarily failing.
-      continue;
-    }
-    try {
+      if (!response.ok) {
+        failures.push(`${model}: HTTP ${response.status}`);
+        continue;
+      }
       const data = await response.json();
       const text = data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("");
       if (text) return text;
       failures.push(`${model}: empty response`);
-    } catch {
-      failures.push(`${model}: invalid response`);
+    } catch (error) {
+      failures.push(error?.name === "AbortError"
+        ? `${model}: timed out`
+        : `${model}: request failed`);
     }
   }
-  throw new Error(`Gemini models unavailable (${failures.join("; ")})`);
+  throw new Error(`Gemini could not respond within the time limit (${failures.join("; ")})`);
 }
 
 async function openAICompatible(provider, prompt) {
