@@ -47,11 +47,14 @@ for (const item of corpus) {
   assert.equal(genericPhraseHits, 0, item.id + ": known boilerplate phrase remains");
   assert.equal(missingConcreteExample, false, item.id + ": video must contain a concrete, topic-aware example");
   if (item.format === "story") assert.ok(text.includes("STORY BUILDER"), item.id + ": story template must be clearly labelled as a builder");
+  if (item.format === "lesson" && /price|pricing|service|cost/i.test(item.thought)) {
+    assert.ok(text.includes("Worked example:"), item.id + ": pricing lesson should include a worked calculation");
+  }
   if (item.format === "mini" || item.format === "course") {
     assert.ok(text.includes("Demonstration: Sample:") || text.includes("Demonstration: Worked example:"), item.id + ": course must include a concrete demonstration");
     assert.ok(text.includes("Practice: "), item.id + ": course must include a practice task");
-    const practices = Array.from(text.matchAll(/Practice: ([^\\n]+)/g), match => match[1]);
-    const demonstrations = Array.from(text.matchAll(/Demonstration: ([^\\n]+)/g), match => match[1]);
+    const practices = Array.from(text.matchAll(/Practice: ([^\n]+)/g), match => match[1]);
+    const demonstrations = Array.from(text.matchAll(/Demonstration: ([^\n]+)/g), match => match[1]);
     assert.equal(new Set(practices).size, practices.length, item.id + ": lesson practice tasks must be distinct");
     assert.equal(new Set(demonstrations).size, demonstrations.length, item.id + ": lesson demonstrations must be distinct");
   }
@@ -64,7 +67,7 @@ const videoRows = rows.filter(row => row.format === "video");
 const avgVideoWords = videoRows.reduce((sum, row) => sum + row.words, 0) / Math.max(1, videoRows.length);
 const passRate = rows.filter(row => row.passed).length / rows.length;
 console.log(JSON.stringify({
-  benchmarkVersion: "1.4.1",
+  benchmarkVersion: "1.4.3",
   engineVersion: engine.version,
   componentCount: engine.componentCount,
   corpusCases: corpus.length,
