@@ -143,7 +143,7 @@
     const sections = [hook];
     if (second) sections.push(second);
     sections.push(demonstrationFor(idea));
-    sections.push(reflectionLine(idea));
+    sections.push(actionLine(idea));
     if (creatorLine) sections.push(creatorLine);
     sections.push(close);
     return sections.join("\n\n");
@@ -239,7 +239,7 @@
     return { script, caption: caption(thought), format, componentCount: components.length };
   }
   root.TTVContentEngine = {
-    version: "1.2.0", componentCount: components.length, components: components.slice(), generate,
+    version: "1.3.0", componentCount: components.length, components: components.slice(), generate,
     component: (family, seed) => component(clean(family), clean(seed)),
     caption: raw => caption(clean(raw)), video: (raw, tone, creator) => video(raw, tone, creator),
     course: (raw, full) => course(raw, full), story: (raw, tone) => story(raw, tone), lesson: raw => lesson(raw)
