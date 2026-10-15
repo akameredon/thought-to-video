@@ -168,13 +168,29 @@ export const handler = async (request) => {
   }
 
   const failures = [];
+  // Keep the whole provider chain comfortably below Netlify's gateway timeout.
+  // A provider can occasionally stall even when its own request timeout is set.
+  const overallDeadline = Date.now() + 7800;
   for (const [name, call] of configured) {
+    const remaining = overallDeadline - Date.now();
+    if (remaining < 700) {
+      failures.push(`${name}: skipped to avoid the function timing out`);
+      break;
+    }
+    let timeoutId;
     try {
-      const raw = await call();
+      const raw = await Promise.race([
+        call(),
+        new Promise((_, reject) => {
+          timeoutId = setTimeout(() => reject(new Error("provider time budget exceeded")), remaining - 250);
+        })
+      ]);
       const output = parseOutput(raw);
       return json(200, { ...output, provider: name });
     } catch (error) {
       failures.push(`${name}: ${String(error?.message || "request failed").slice(0, 120)}`);
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
   return json(502, {
