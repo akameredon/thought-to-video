@@ -7,7 +7,29 @@
 <script>
 const $=id=>document.getElementById(id);let stream=null,recorder=null,chunks=[],url=null,facing="user",installPrompt=null,scrollTimer=null,recInterval=null,started=0,scrollSpeed=2;const KEY="ttv-draft-v1";
 function clean(s){return s.replace(/\s+/g," ").trim()}function sentences(s){return(s.match(/[^.!?]+[.!?]?/g)||[s]).map(x=>x.trim()).filter(Boolean)}function words(s){const a=clean(s).match(/\b[\p{L}\p{N}'’-]+\b/gu);return a?a.length:0}
-function build(raw,tone){const p=sentences(clean(raw));if(!p.length)return"";const first=p[0].replace(/[.!?]+$/,""),rest=p.slice(1).join(" ");let hook=tone==="bold"?"Can we talk honestly about this?":tone==="helpful"?"Here’s something I’ve been learning.":tone==="story"?"Let me tell you what’s been on my mind.":"Can I be honest about something?";if(p.length>=3&&first.length>18)hook=first+".";const ending=tone==="helpful"?"I’m sharing this in case it helps someone else. What has your experience been?":tone==="bold"?"I’m figuring this out one step at a time. Have you experienced this too?":tone==="story"?"I’m still learning, and I wanted to be honest about the journey. Can anyone relate?":"I’m still working through it, but I know I’m not the only one. Can you relate?";return hook+"\n\n"+first+(rest?".\n\n"+rest:"")+".\n\n"+ending}
+function build(raw,tone){
+ const idea=clean(raw), parts=sentences(idea), first=(parts[0]||idea).replace(/[.!?]+$/,""), rest=parts.slice(1).join(" ");
+ const hooks={
+  natural:"There’s something about this worth thinking through.",
+  bold:"Here’s the point I don’t want us to miss.",
+  helpful:"Let’s make this idea practical.",
+  story:"Let me start with the thought that has been on my mind."
+ };
+ const endings={
+  natural:"The point is not to have everything figured out today. It is to understand the idea clearly enough to take one useful next step. What would that step look like for you?",
+  bold:"You do not need a perfect plan before you begin. Identify the next useful action, do it, and learn from what happens. What is one step you can take?",
+  helpful:"Try this: write down the problem, choose one small action you can take, and decide how you will know whether it helped. Keep it simple and adjust as you learn.",
+  story:"I’m sharing the thought, not pretending I have every answer. Sometimes putting an idea into words is the first step toward doing something useful with it. How do you see it?"
+ };
+ const body=parts.length>1?rest:"The useful thing is to slow down and look at what this idea actually means in everyday life. Instead of trying to solve everything at once, break it into smaller parts and focus on what you can influence.";
+ const example="For example, take the idea you are dealing with and ask three questions: what is happening, why does it matter, and what is one realistic action you can take next? That turns a vague thought into something you can work with.";
+ return (parts.length>=3?first+".\n\n"+rest:hooks[tone]||hooks.natural+"\n\n"+first+".\n\n"+body)+"\n\n"+example+"\n\n"+(endings[tone]||endings.natural)
+}
+function offlineCaption(raw){
+ const topic=clean(raw).replace(/[.!?]+$/,"");
+ const short=topic.length>130?topic.slice(0,127).trim()+"…":topic;
+ return short+"\n\nA thought worth sharing—and a reminder to turn ideas into practical next steps.\n\nWhat’s your take? Share it in the comments.\n\n#ThoughtToVideo #ContentCreation";
+}
 function courseContent(raw,full){const topic=clean(raw).replace(/[.!?]+$/,"");const lessons=full?[
 ["Start here: understand "+topic,"Explain the problem in plain language, who it affects, and what learners will be able to do by the end."],
 ["The basic building blocks","Introduce the few tools, materials, or ideas learners need. Define unfamiliar words and show a simple example."],
@@ -24,7 +46,37 @@ function courseContent(raw,full){const topic=clean(raw).replace(/[.!?]+$/,"");co
 function updateCount(){const n=words($("script").value);$("count").textContent=n+" words · about "+Math.max(1,Math.round(n/2.4))+" seconds";$("prompterText").textContent=$("script").value||"Your script will appear here."}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({thought:$("thought").value,script:$("script").value,caption:$("caption").value,tone:$("tone").value,business:$("business").value,contentType:$("contentType").value}))}catch{}}
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||"{}");["thought","script","caption","tone","business","contentType"].forEach(k=>{if(d[k])$(k).value=d[k]});if(d.script)$("scriptPanel").classList.remove("hidden");updateCount()}catch{}}
-$("generate").onclick=async()=>{const raw=clean($("thought").value);if(!raw){$("thought").focus();$("voiceStatus").textContent="Start with any thought—even a few words. You do not need to explain everything.";return}const type=$("contentType").value;const button=$("generate");button.disabled=true;button.textContent="Thinking…";$("voiceStatus").textContent="Developing your idea into useful content. This may take a few seconds.";try{let response;try{response=await fetch("/.netlify/functions/generate",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({thought:raw,contentType:type,tone:$("tone").value,creator:$("business").value})})}catch{throw new Error("Could not connect to the AI service. Please check your internet connection and try again. If this continues, the website deployment may need attention.")}const responseText=await response.text();let data;try{data=JSON.parse(responseText)}catch{throw new Error("The AI service returned an unexpected response (HTTP "+response.status+"). The website may still be deploying or the service may be temporarily unavailable. Please try again shortly.")}if(!response.ok){const diagnostic=Array.isArray(data.details)&&data.details.length?"\n\nProvider details: "+data.details.join(" | "):"";throw new Error((data.error||("AI service request failed (HTTP "+response.status+")."))+diagnostic)}$("outputTitle").textContent=type==="course"?"Your course outline":type==="mini"?"Your mini-course":"Your talking script";$("outputHint").textContent=(type==="video"?"AI-developed script, aimed at about 60 seconds. Edit anything that doesn’t sound like you.":"AI-developed outline. Personalize the examples and lessons before publishing.")+(data.provider?" · Generated with "+data.provider:"");$("script").value=data.script;$("caption").value=data.caption;$("scriptPanel").classList.remove("hidden");$("voiceStatus").textContent="Your content is ready.";updateCount();save();$("scriptPanel").scrollIntoView({behavior:"smooth"})}catch(error){$("voiceStatus").textContent=error.message||"Something went wrong. Please try again.";alert(error.message||"Could not generate content. Please try again.")}finally{button.disabled=false;button.textContent="Build my content ↗"}};
+$("generate").onclick=async()=>{
+ const raw=clean($("thought").value);
+ if(!raw){$("thought").focus();$("voiceStatus").textContent="Start with any thought—even a few words. You do not need to explain everything.";return}
+ const type=$("contentType").value,tone=$("tone").value,button=$("generate");
+ button.disabled=true;button.textContent="Building…";
+ $("voiceStatus").textContent="Trying the AI writer first. If it is unavailable, this app will create a draft on your device.";
+ let data=null,offline=false;
+ try{
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8500);
+  try{
+   const response=await fetch("/.netlify/functions/generate",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({thought:raw,contentType:type,tone,creator:$("business").value}),signal:controller.signal});
+   const responseText=await response.text();
+   try{const parsed=JSON.parse(responseText);if(response.ok&&typeof parsed.script==="string"&&parsed.script.trim().length>20){data=parsed}}catch{}
+  }finally{clearTimeout(timer)}
+ }catch{}
+ if(!data){
+  offline=true;
+  data={script:type==="video"?build(raw,tone):courseContent(raw,type==="course"),caption:offlineCaption(raw),provider:"On-device writer"};
+ }
+ $("outputTitle").textContent=type==="course"?"Your course outline":type==="mini"?"Your mini-course":"Your talking script";
+ $("outputHint").textContent=offline
+  ?"Created on your device without an AI API. Edit the draft, add your own details, and make it sound like you."
+  :(type==="video"?"AI-developed script, aimed at about 60 seconds. Edit anything that doesn’t sound like you.":"AI-developed outline. Personalize the examples and lessons before publishing.")+(data.provider?" · Generated with "+data.provider:"");
+ $("script").value=data.script;$("caption").value=data.caption;
+ $("scriptPanel").classList.remove("hidden");
+ $("voiceStatus").textContent=offline
+  ?"AI was unavailable, so your draft was created locally. You can still edit, copy, use the teleprompter, and record."
+  :"Your content is ready.";
+ updateCount();save();$("scriptPanel").scrollIntoView({behavior:"smooth"});
+ button.disabled=false;button.textContent="Build my content ↗";
+}
 $("edit").onclick=()=>$("create").scrollIntoView({behavior:"smooth"});$("copy").onclick=async()=>{try{await navigator.clipboard.writeText($("script").value);$("copy").textContent="Copied ✓";setTimeout(()=>$("copy").textContent="Copy script",1500)}catch{$("script").select();document.execCommand("copy")}};$("openRecord").onclick=()=>{$("recordPanel").classList.remove("hidden");updateCount();$("recordPanel").scrollIntoView({behavior:"smooth"})};$("backScript").onclick=()=>$("scriptPanel").scrollIntoView({behavior:"smooth"});["thought","script","caption","tone","business","contentType"].forEach(k=>$(k).addEventListener("input",()=>{updateCount();save()}));
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;$("dictate").onclick=()=>{if(!SR){$("voiceStatus").textContent="Use your iPhone keyboard microphone to dictate in this browser.";return}const r=new SR();r.lang=navigator.language||"en-US";r.continuous=true;r.interimResults=true;const initial=$("thought").value.trim();$("dictate").disabled=true;$("dictate").textContent="Listening…";r.onresult=e=>{let t="";for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript+" ";$("thought").value=(initial?initial+" ":"")+t;save()};r.onerror=()=>{$("voiceStatus").textContent="Voice input stopped. You can continue typing."};r.onend=()=>{$("dictate").disabled=false;$("dictate").textContent="🎙 Dictate thought";$("voiceStatus").textContent="Dictation finished. Check your words.";save()};r.start()};
 function mime(){if(!window.MediaRecorder)return"";for(const type of ["video/mp4","video/webm","video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/webm;codecs=vp8,opus"]){try{if(MediaRecorder.isTypeSupported(type))return type}catch{}}return""}
