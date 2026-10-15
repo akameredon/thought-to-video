@@ -65,3 +65,22 @@ Latest GitHub Actions run for engine 1.3.1: https://github.com/akameredon/though
 - Average video script length: 104 words, still below the rough 120–150-word guide for a 60-second video. This is a remaining improvement area, not something to solve by padding every script.
 
 The initial sample scores above are retained as the baseline and have not been re-scored after these changes. The manual quality gate therefore remains open.
+
+
+
+## Follow-up quality pass — engine 1.4.3
+
+This pass follows the 1.3.1 changes and focuses on teaching utility and actionable captions:
+
+- Captions now end with a topic-relevant action instead of a generic engagement question.
+- Course and mini-course lessons use distinct, topic-specific demonstrations and lesson tasks. Automated tests check that the demonstration and practice text is not repeated across lessons.
+- Pricing lessons include a worked calculation (illustrative figures only, before overhead, taxes, or profit). Freelancer-boundary lessons receive a sample scope-confirmation message.
+- Lesson topic titles remove trailing punctuation, and pricing lessons are routed to pricing examples instead of a mismatched shop/WhatsApp example.
+- The story format remains clearly identified as a story builder and asks users to verify personal details instead of inventing them.
+
+Latest CI run: https://github.com/akameredon/thought-to-video/actions/runs/38775248443
+
+- GitHub Actions: success.
+- All 12 benchmark cases passed the repository's automated structural, selected-term, and boilerplate checks.
+- Manual review scores have not yet been repeated for this version. Automated pass status is not evidence that the release quality gate has been met.
+- Video output remains uneven in length: several samples are under 120 words. Do not pad mechanically; the next review should assess whether each short script needs a stronger idea-specific explanation or should remain concise.
