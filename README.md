@@ -33,8 +33,13 @@ Use localhost or an HTTPS host because camera and microphone access generally re
 - [ ] Test the available recording format on iOS Safari
 - [ ] Confirm offline shell and `content-engine.js` after first successful load
 - [x] Local content generation works without an AI provider or usage budget
-- [ ] Add unit tests for each content family and evaluate output quality across varied topics
+- [x] Run the deterministic quality benchmark against the fixed corpus with node tests/quality-benchmark.mjs
+- [ ] Review sample outputs with the human quality rubric in QUALITY-GATE.md before claiming production-ready quality
 - [ ] Deploy only after device testing passes
+
+## Quality benchmark
+
+Run node tests/quality-benchmark.mjs with Node.js. The benchmark uses a fixed set of representative ideas and checks that key concepts survive generation, required format sections are present, and output is not empty. It reports video word counts and a small set of generic-phrase indicators. Passing these automated checks is a regression signal, not proof that writing is excellent; use QUALITY-GATE.md for human review.
 
 ## Deployment
 Static site; publish the repository root with no build command. HTTPS is required for camera/microphone APIs. Do not deploy as a production AI service until a server-side AI endpoint, rate limits, and secret management are configured and tested.
