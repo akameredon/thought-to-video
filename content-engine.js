@@ -71,6 +71,38 @@
       return "Define what a finished result looks like before you begin. Protect a short block of focused time, then compare the result with that definition instead of measuring activity alone.";
     return "Choose one action that follows directly from this idea. Keep it small, decide what a useful result would look like, and review what happened before choosing the next step.";
   }
+  function demonstrationFor(idea) {
+    const lower = idea.toLowerCase();
+    if (/\b(whatsapp|customer|client|sales|business|product|service|shop)\b/.test(lower))
+      return "For a shop using WhatsApp status, post one product photo with its price, availability, and a clear way to order. Track which questions customers ask so tomorrow's post answers a real question.";
+    if (/\b(money|saving|budget|spend|income|cost|price|pricing|profit|bill)\b/.test(lower))
+      return "For a simple weekly money review, write down each expense for seven days, group essentials separately from optional spending, then choose one change you can realistically keep. Do not set a savings target until you know what is left after essential bills.";
+    if (/\b(ai|programmer|prompt|technology)\b/.test(lower))
+      return "Instead of asking an AI tool to 'help with my business', describe one real task, the audience, the constraints, and the format you need. Then verify names, figures, and claims before using its answer.";
+    if (/\b(content|post|video|creator|audience|social media)\b/.test(lower))
+      return "For a local business, plan one post that answers a customer question, one that demonstrates the product, and one that explains how to buy. Put each on the calendar only if it serves a clear audience need.";
+    if (/\b(consisten|schedule|every day|posting)\b/.test(lower))
+      return "If daily posting is unrealistic, choose two repeatable days each week and prepare a small batch in advance. Keep the schedule only if you can maintain useful quality without exhausting yourself.";
+    if (/\b(movement|progress|focus|task|plan|time)\b/.test(lower))
+      return "Before opening messages or tutorials, write down the one deliverable that would make today successful. Work on it for a protected 25-minute block, then record whether the deliverable moved forward.";
+    if (/\b(freelancer|deadline|revision|scope|payment)\b/.test(lower))
+      return "Before starting a freelance job, send a short written agreement listing the deliverable, deadline, included revisions, payment schedule, and what counts as extra work. Ask the client to confirm it.";
+    if (/\b(clean|street|resident|pickup|collection)\b/.test(lower))
+      return "Residents could agree on a collection day, share the time and contact for missed pickups, and review after two weeks whether the arrangement reduced missed collections.";
+    return "Choose one real situation where this idea applies. Write down the first action, the result you expect to see, and how you will check whether it worked.";
+  }
+  function practiceFor(idea) {
+    const lower = idea.toLowerCase();
+    if (/\b(price|pricing|service|cost|time|market)\b/.test(lower))
+      return "Practice: price one service. List direct costs, estimate hours, choose a rate for that time, check comparable offers, and write exactly what the customer receives. Review whether the price covers the costs and time.";
+    if (/\b(budget|spending|bills|saving|income)\b/.test(lower))
+      return "Practice: create a one-week tracker with columns for date, item, amount, and essential or optional. Add the expenses you know, then update it daily and review the totals at week's end.";
+    if (/\b(content|social media|post|creator|audience)\b/.test(lower))
+      return "Practice: draft a seven-day content plan. For each day, write the audience question, one key message, the format, and the next step you want the audience to take. Remove posts that repeat the same purpose.";
+    if (/\b(freelancer|deadline|revision|scope|payment)\b/.test(lower))
+      return "Practice: write a project-confirmation message with the deliverable, deadline, number of revisions, payment terms, and how extra requests will be handled.";
+    return "Practice: complete one small real-world task related to the idea. Save the result and note what you would change on a second attempt.";
+  }
   function reflectionLine(idea) {
     const lower = idea.toLowerCase();
     if (/\b(money|saving|budget|spend|income|cost|price|pricing|profit)\b/.test(lower))
@@ -100,16 +132,16 @@
     const second = parts.length > 1 ? parts.slice(1).join(" ") : "";
     const action = actionLine(idea);
     const close = tone === "bold"
-      ? "The point is to act on the idea, not just agree with it. What is the first step you will take?"
+      ? "Choose one step and do it before adding another." 
       : tone === "story"
-        ? "Keep the lesson honest and grounded in what you actually know. What would you add from your own experience?"
+        ? "Use the lesson only as far as your real experience supports it."
         : tone === "helpful"
-          ? "Try it once, pay attention to the result, and adjust from there. That is more useful than waiting for a perfect plan."
-          : "You do not have to solve everything at once. Start with the part you can influence and build from there.";
+          ? "Start small, check the result, and adjust based on what you learn."
+          : "What is one realistic step you can take next?";
     const sections = [hook];
     if (second) sections.push(second);
     else sections.push("The important thing is to connect the idea to a real situation, not leave it as a slogan.");
-    sections.push("For example, " + action.charAt(0).toLowerCase() + action.slice(1));
+    sections.push(demonstrationFor(idea));
     sections.push(reflectionLine(idea));
     if (creatorLine) sections.push(creatorLine);
     sections.push(close);
