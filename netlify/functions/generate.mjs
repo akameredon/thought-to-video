@@ -45,30 +45,53 @@ ${thought}`;
 async function gemini(prompt) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("Gemini is not configured");
-  const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
-  const body = JSON.stringify({
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
-    generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
-  });
 
-  // Retry temporary overload/rate-limit/server errors a couple of times before
-  // giving up, so brief Gemini interruptions do not immediately break generation.
-  let response;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    response = await fetch(url, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body
+  // If the configured/default model is unavailable or overloaded, try other
+  // current, lightweight Gemini models before falling through to another provider.
+  const preferred = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+  const models = [...new Set([preferred, "gemini-3.6-flash", "gemini-3.5-flash-lite"])];
+  const failures = [];
+
+  for (const model of models) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
+    const body = JSON.stringify({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
     });
-    if (response.ok || ![429, 500, 502, 503, 504].includes(response.status) || attempt === 2) break;
-    await new Promise(resolve => setTimeout(resolve, 600 * (attempt + 1)));
+
+    let response;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        response = await fetch(url, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body
+        });
+      } catch (error) {
+        failures.push(`${model}: network request failed`);
+        response = null;
+        break;
+      }
+      if (response.ok || ![429, 500, 502, 503, 504].includes(response.status) || attempt === 2) break;
+      await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+    }
+
+    if (!response) continue;
+    if (!response.ok) {
+      failures.push(`${model}: HTTP ${response.status}`);
+      // Try the next model if this one is unavailable or temporarily failing.
+      continue;
+    }
+    try {
+      const data = await response.json();
+      const text = data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("");
+      if (text) return text;
+      failures.push(`${model}: empty response`);
+    } catch {
+      failures.push(`${model}: invalid response`);
+    }
   }
-  if (!response.ok) throw new Error(`Gemini HTTP ${response.status}`);
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("");
-  if (!text) throw new Error("Gemini returned an empty response");
-  return text;
+  throw new Error(`Gemini models unavailable (${failures.join("; ")})`);
 }
 
 async function openAICompatible(provider, prompt) {
