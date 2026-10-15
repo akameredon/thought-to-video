@@ -75,7 +75,7 @@
   }
   function demonstrationFor(idea) {
     const lower = idea.toLowerCase();
-    if (/\b(whatsapp|customer|client|sales|business|product|service|shop)\b/.test(lower))
+    if (/\b(whatsapp|customer|client|sales|business|product|shop)\b/.test(lower))
       return "For a shop using WhatsApp status, post one product photo with its price, availability, and a clear way to order. Track which questions customers ask so tomorrow's post answers a real question.";
     if (/\b(consisten|schedule|every day|posting)\b/.test(lower))
       return "If daily posting is unrealistic, choose two repeatable days each week and prepare a small batch in advance. Keep the schedule only if you can maintain useful quality without exhausting yourself.";
@@ -280,7 +280,7 @@
     return { script, caption: caption(thought), format, componentCount: components.length };
   }
   root.TTVContentEngine = {
-    version: "1.4.2", componentCount: components.length, components: components.slice(), generate,
+    version: "1.4.3", componentCount: components.length, components: components.slice(), generate,
     component: (family, seed) => component(clean(family), clean(seed)),
     caption: raw => caption(clean(raw)), video: (raw, tone, creator) => video(raw, tone, creator),
     course: (raw, full) => course(raw, full), story: (raw, tone) => story(raw, tone), lesson: raw => lesson(raw)
