@@ -46,14 +46,24 @@ async function gemini(prompt) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("Gemini is not configured");
   const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
-    })
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
+  const body = JSON.stringify({
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
   });
+
+  // Retry temporary overload/rate-limit/server errors a couple of times before
+  // giving up, so brief Gemini interruptions do not immediately break generation.
+  let response;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    response = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body
+    });
+    if (response.ok || ![429, 500, 502, 503, 504].includes(response.status) || attempt === 2) break;
+    await new Promise(resolve => setTimeout(resolve, 600 * (attempt + 1)));
+  }
   if (!response.ok) throw new Error(`Gemini HTTP ${response.status}`);
   const data = await response.json();
   const text = data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("");
