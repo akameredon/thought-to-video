@@ -78,7 +78,7 @@
       return "For a shop using WhatsApp status, post one product photo with its price, availability, and a clear way to order. Track which questions customers ask so tomorrow's post answers a real question.";
     if (/\b(consisten|schedule|every day|posting)\b/.test(lower))
       return "If daily posting is unrealistic, choose two repeatable days each week and prepare a small batch in advance. Keep the schedule only if you can maintain useful quality without exhausting yourself.";
-    if (/\b(money|saving|budget|spend|income|price|pricing|profit|bill|expenses?)\b/.test(lower))
+    if (/\b(money|saving|budget|income|price|pricing|profit|bill|expenses?|spending)\b/.test(lower))
       return "For a simple weekly money review, write down each expense for seven days, group essentials separately from optional spending, then choose one change you can realistically keep. Do not set a savings target until you know what is left after essential bills.";
     if (/\b(ai|programmer|prompt|technology)\b/.test(lower))
       return "Instead of asking an AI tool to 'help with my business', describe one real task, the audience, the constraints, and the format you need. Then verify names, figures, and claims before using its answer.";
@@ -148,7 +148,32 @@
   }
   function course(thought, full) {
     const topic = clean(thought).replace(/[.!?]+$/, "");
-    const lessons = full ? [
+    const lowerTopic = topic.toLowerCase();
+    const isContentPlan = /content|social media|post|creator|audience/.test(lowerTopic);
+    const isBudget = /budget|spending|bills|saving|income|money/.test(lowerTopic);
+    const lessons = isContentPlan ? (full ? [
+      ["Choose a specific audience", "Describe one local customer group and list three questions they commonly ask."],
+      ["Set three content purposes", "Separate helpful answers, product demonstrations, and buying information."],
+      ["Turn questions into post ideas", "Write one clear message for each idea and choose a suitable format."],
+      ["Build the seven-day calendar", "Place varied posts across seven days without repeating the same purpose."],
+      ["Draft and check each post", "Check accuracy, clarity, relevance, and the next step for the audience."],
+      ["Review results and improve", "Use questions, replies, saves, or enquiries as signals for the next week's plan."]
+    ] : [
+      ["Choose the audience and goal", "Name one customer group and one result the content should help achieve."],
+      ["Create three useful post types", "Draft a customer answer, a product demonstration, and a buying-information post."],
+      ["Make a seven-day plan", "Put the ideas on a calendar and check that each post has a distinct purpose."]
+    ]) : isBudget ? (full ? [
+      ["Map income and bill dates", "List expected income dates and essential bills with their due dates."],
+      ["Separate essential and flexible spending", "Sort known expenses into clear categories without guessing missing amounts."],
+      ["Build a weekly spending tracker", "Record date, item, amount, and category for each expense."],
+      ["Plan for bills before spending", "Compare bill dates with expected income and identify any timing gap early."],
+      ["Make a realistic adjustment", "Choose one flexible expense to review without cutting essential needs blindly."],
+      ["Review and revise the budget", "Compare planned and actual amounts, explain differences, and update the next week."]
+    ] : [
+      ["List income and essential bills", "Record expected income, bill amounts, and due dates."],
+      ["Track one week of spending", "Log each expense and label it essential or flexible."],
+      ["Review and choose one change", "Compare totals and select one realistic adjustment for next week."]
+    ]) : full ? [
       ["Define the problem and the result", "Learners describe the starting problem and write one observable outcome they want to achieve."],
       ["Learn the key decisions", "Break the topic into its essential choices. Define unfamiliar terms and explain when each choice matters."],
       ["Follow a repeatable process", "Demonstrate the process in order. Learners make a first attempt using a guided checklist."],
