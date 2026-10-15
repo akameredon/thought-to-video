@@ -4,113 +4,152 @@
  */
 (function (root) {
   "use strict";
-
-  const families = [
-    "hook", "explanation", "story", "example", "transition",
-    "conclusion", "lesson", "course", "caption", "quality"
-  ];
-  const strategies = [
-    "plain-language", "problem-first", "contrast", "question-led", "step-by-step",
-    "myth-correction", "cause-and-effect", "beginner-friendly", "reflection", "action-first"
-  ];
-  const perspectives = [
-    "beginner", "small-business", "creator", "educator", "freelancer",
-    "personal-brand", "community", "practical", "storyteller", "coach"
-  ];
+  const families = ["hook", "explanation", "story", "example", "transition", "conclusion", "lesson", "course", "caption", "quality"];
+  const strategies = ["plain-language", "problem-first", "contrast", "question-led", "step-by-step", "myth-correction", "cause-and-effect", "beginner-friendly", "reflection", "action-first"];
+  const perspectives = ["beginner", "small-business", "creator", "educator", "freelancer", "personal-brand", "community", "practical", "storyteller", "coach"];
   const components = [];
-  for (const family of families) {
-    for (const strategy of strategies) {
-      for (const perspective of perspectives) {
-        components.push({
-          id: family + "-" + strategy + "-" + perspective,
-          family, strategy, perspective,
-          instruction: "Use a " + strategy + " approach from a " + perspective + " perspective."
-        });
-      }
-    }
+  for (const family of families) for (const strategy of strategies) for (const perspective of perspectives) {
+    components.push({ id: family + "-" + strategy + "-" + perspective, family, strategy, perspective,
+      instruction: "Use a " + strategy + " approach from a " + perspective + " perspective." });
   }
 
-  const hooks = {
-    natural: ["There’s something about this worth thinking through.", "Let’s talk honestly about this.", "Here’s an idea I’ve been turning over."],
-    bold: ["Here’s the point we shouldn’t ignore.", "Let’s get straight to the useful part.", "One thing needs to be said clearly."],
-    helpful: ["Let’s make this idea practical.", "Here’s a simple way to think about it.", "Let’s break this down into useful steps."],
-    story: ["Let me start with the thought on my mind.", "Imagine facing this in everyday life.", "Every useful lesson starts with a moment worth noticing."]
-  };
-  const endings = {
-    natural: "You do not need every answer today. Understand the idea well enough to take one useful next step. What would that step look like for you?",
-    bold: "Do not wait for a perfect plan. Choose one useful action, do it, and learn from the result. What is your next step?",
-    helpful: "Try this: write down the problem, choose one small action, and decide how you will measure whether it helped. Keep it simple and adjust as you learn.",
-    story: "I’m sharing a thought, not pretending to have every answer. Sometimes putting an idea into words is the first step toward doing something useful. How do you see it?"
-  };
   const clean = value => String(value || "").replace(/\s+/g, " ").trim();
   const sentences = value => (value.match(/[^.!?]+[.!?]?/g) || [value]).map(s => s.trim()).filter(Boolean);
-  const hash = value => {
-    let n = 2166136261;
-    for (let i = 0; i < value.length; i++) n = Math.imul(n ^ value.charCodeAt(i), 16777619);
-    return n >>> 0;
-  };
-  function choose(list, seed) { return list[hash(seed) % list.length]; }
+  const hash = value => { let n = 2166136261; for (let i = 0; i < value.length; i++) n = Math.imul(n ^ value.charCodeAt(i), 16777619); return n >>> 0; };
+  const choose = (list, seed) => list[hash(seed) % list.length];
   function component(family, seed) {
-    return components[hash(family + "|" + seed) % components.length];
+    const matching = components.filter(item => item.family === family);
+    return matching[hash(family + "|" + seed) % matching.length];
   }
-  function caption(topic) {
-    const short = topic.length > 130 ? topic.slice(0, 127).trim() + "…" : topic;
-    return short + "\n\nA thought worth sharing—and a reminder to turn ideas into practical next steps.\n\nWhat’s your take? Share it in the comments.\n\n#ThoughtToVideo #ContentCreation";
+  function firstPersonRisk(text) {
+    return /\b(i|my|me|we|our|us)\b/i.test(text);
+  }
+  function caption(raw) {
+    const topic = clean(raw);
+    if (!topic) return "";
+    const first = sentences(topic)[0] || topic;
+    const prompt = /\b(price|pricing|cost|money|saving|budget|spend|income|profit)\b/i.test(topic)
+      ? "What is one money decision you could review this week?"
+      : /\b(business|customer|client|sales|product|service|shop)\b/i.test(topic)
+        ? "Which part could you try in your business first?"
+        : /\b(learn|teach|lesson|course|student|skill|practice)\b/i.test(topic)
+          ? "What would you want to practise first?"
+          : /\b(content|post|video|creator|audience|social media)\b/i.test(topic)
+            ? "What is one useful idea you could share next?"
+            : "Which part of this idea feels most useful to you?";
+    const body = topic.length > first.length + 8 ? topic.slice(first.length).trim() : "";
+    return first + (body ? "\n\n" + body : "") + "\n\n" + prompt + "\n\n#ThoughtToVideo";
+  }
+  function makeHook(idea, tone) {
+    const first = (sentences(idea)[0] || idea).replace(/[.!?]+$/, "");
+    const lower = idea.toLowerCase();
+    if (/\bnot\b.{0,70}\bbefore\b/.test(lower)) return first + ".";
+    if (/\b(difficult|hard|struggle|problem|mistake|waste|delay|stuck)\b/.test(lower)) {
+      return choose([
+        "If this has been harder than it should be, start here: " + first.charAt(0).toLowerCase() + first.slice(1) + ".",
+        "The problem is not always a lack of effort. " + first + ".",
+        "Here is the part of this problem worth paying attention to: " + first.charAt(0).toLowerCase() + first.slice(1) + "."
+      ], idea + tone);
+    }
+    if (/\b(when|if|because|means|matters|believe|think)\b/.test(lower)) return first + ".";
+    if (tone === "bold") return "Let’s get to the point: " + first.charAt(0).toLowerCase() + first.slice(1) + ".";
+    if (tone === "helpful") return "Here is a practical way to look at it: " + first.charAt(0).toLowerCase() + first.slice(1) + ".";
+    if (tone === "story") return "Start with the real moment behind this idea: " + first.charAt(0).toLowerCase() + first.slice(1) + ".";
+    return first + ".";
+  }
+  function actionLine(idea) {
+    const lower = idea.toLowerCase();
+    if (/\b(whatsapp|customer|client|sales|business|product|service)\b/.test(lower))
+      return "Make the next step visible to the people you serve. Choose one customer-facing action, do it consistently, and notice the questions or responses it brings back.";
+    if (/\b(money|saving|budget|spend|income|cost|price|pricing|profit)\b/.test(lower))
+      return "Make the next step small enough to measure. Write down the number, date, or decision you want to track, then review the result before changing the plan.";
+    if (/\b(learn|learning|teach|student|skill|course|practice|practise|AI|programmer)\b/.test(lower))
+      return "Turn the idea into a short practice session. Try one example yourself, check what worked, and explain the result in your own words before moving on.";
+    if (/\b(content|post|video|creator|audience|social media)\b/.test(lower))
+      return "Choose one clear message for one specific audience. Draft it, remove anything that does not support the message, and publish only when the point is easy to understand.";
+    if (/\b(time|focus|progress|task|plan|consistent|consistency)\b/.test(lower))
+      return "Define what a finished result looks like before you begin. Protect a short block of focused time, then compare the result with that definition instead of measuring activity alone.";
+    return "Choose one action that follows directly from this idea. Keep it small, decide what a useful result would look like, and review what happened before choosing the next step.";
   }
   function video(thought, tone, creator) {
-    const idea = clean(thought), parts = sentences(idea), first = (parts[0] || idea).replace(/[.!?]+$/, "");
-    const body = parts.length > 1 ? parts.slice(1).join(" ") :
-      "The useful thing is to slow down and look at what this means in everyday life. Break the idea into smaller parts and focus on what you can influence.";
-    const seed = idea + "|" + tone + "|" + (creator || "");
-    const hook = choose(hooks[tone] || hooks.natural, seed + "|" + component("hook", seed).id);
-    const example = "For example, take this idea and ask three questions: what is happening, why does it matter, and what is one realistic action you can take next? That turns a vague thought into something you can work with.";
-    const close = endings[tone] || endings.natural;
-    return (parts.length >= 3 ? first + ".\n\n" + parts.slice(1).join(" ") : hook + "\n\n" + first + ".\n\n" + body) + "\n\n" + example + "\n\n" + close;
+    const idea = clean(thought);
+    if (!idea) return "";
+    const parts = sentences(idea);
+    const hook = makeHook(idea, tone || "natural");
+    const creatorLine = /\bsmall business owner\b/i.test(creator || "")
+      ? "For a small business, the test is simple: does this help a real customer understand, decide, or act?"
+      : /\bfreelancer\b/i.test(creator || "")
+        ? "As a freelancer, connect the idea to the result a client can actually see."
+        : /\beducator\b/i.test(creator || "")
+          ? "When teaching this, give people a chance to try the idea rather than only hear about it."
+          : "";
+    const second = parts.length > 1 ? parts.slice(1).join(" ") : "";
+    const action = actionLine(idea);
+    const close = tone === "bold"
+      ? "The point is to act on the idea, not just agree with it. What is the first step you will take?"
+      : tone === "story"
+        ? "Keep the lesson honest and grounded in what you actually know. What would you add from your own experience?"
+        : tone === "helpful"
+          ? "Try it once, pay attention to the result, and adjust from there. That is more useful than waiting for a perfect plan."
+          : "You do not have to solve everything at once. Start with the part you can influence and build from there.";
+    const sections = [hook];
+    if (second) sections.push(second);
+    else sections.push("The important thing is to connect the idea to a real situation, not leave it as a slogan.");
+    sections.push(action);
+    if (creatorLine) sections.push(creatorLine);
+    sections.push(close);
+    return sections.join("\n\n");
   }
   function course(thought, full) {
     const topic = clean(thought).replace(/[.!?]+$/, "");
     const lessons = full ? [
-      ["Start here: understand the idea", "Explain the problem in plain language, who it affects, and what learners will be able to do."],
-      ["Learn the building blocks", "Introduce essential concepts and define unfamiliar terms with a simple example."],
-      ["Follow the process", "Demonstrate the process in small actions learners can copy."],
-      ["Work through a real example", "Show a realistic example and explain how to correct common mistakes."],
-      ["Practise independently", "Give learners a guided task, a checklist, and a clear standard for success."],
-      ["Build a repeatable system", "Explain how to repeat the process, improve quality, and choose the next step."]
+      ["Define the problem and the result", "Learners describe the starting problem and write one observable outcome they want to achieve."],
+      ["Learn the key decisions", "Break the topic into its essential choices. Define unfamiliar terms and explain when each choice matters."],
+      ["Follow a repeatable process", "Demonstrate the process in order. Learners make a first attempt using a guided checklist."],
+      ["Compare worked examples", "Review a strong example and a common mistake. Ask learners to explain the difference and correct the mistake."],
+      ["Practise with a new case", "Learners apply the process to their own situation and record the evidence or result."],
+      ["Review and improve", "Learners compare their result with the original goal, identify one gap, and plan a second attempt."]
     ] : [
-      ["Understand the basics", "Explain the idea in simple terms and show why it matters."],
-      ["Follow the steps", "Demonstrate a beginner-friendly process from start to finish."],
-      ["Try it yourself", "Work through an example, identify common mistakes, and set a short practice task."]
+      ["Understand the outcome", "Describe what a beginner should be able to do and why it matters in a real situation."],
+      ["Learn and follow the steps", "Demonstrate a short process with a worked example learners can copy."],
+      ["Practise and review", "Give learners a task, a simple success checklist, and a way to correct one mistake."]
     ];
     let out = (full ? "COURSE OUTLINE" : "MINI-COURSE OUTLINE") + "\n" + topic +
-      "\n\nWHO IT IS FOR\nBeginners who want a clear, practical way to understand and apply this idea." +
-      "\n\nLEARNING PROMISE\nLearners should be able to explain the main idea and complete a first practical attempt.";
+      "\n\nWHO IT IS FOR\nBeginners who need a practical first result, not just an introduction to the subject." +
+      "\n\nLEARNING OUTCOME\nBy the end, learners will use the process taught here to complete one small, observable task related to: " + topic + "." +
+      "\n\nBEFORE YOU START\nAsk learners what they already know, what they need to do, and what a successful result would look like.";
     lessons.forEach((lesson, index) => {
       out += "\n\nLESSON " + (index + 1) + ": " + lesson[0] +
-        "\nWhat to teach: " + lesson[1] +
-        "\nExample: Demonstrate the lesson using an ordinary, realistic situation." +
-        "\nLearner task: Ask learners to try the step and note what happened.";
+        "\nOutcome: " + lesson[1] +
+        "\nDemonstration: Work through one example related to " + topic + ", explaining the decision at each step." +
+        "\nPractice: Ask learners to complete one small step themselves and note where they got stuck." +
+        "\nCheck: Ask learners to show or explain what they did, then compare it with the lesson outcome.";
     });
-    return out + "\n\nFINAL PROJECT\nAsk learners to apply the steps to produce one small result they can show or use." +
-      "\n\nCHECK FOR UNDERSTANDING\n1. What is the main idea?\n2. Which step would you take first?\n3. What would you do if you got stuck?" +
-      "\n\nCREATOR NOTE\nAdd an example from your own experience. Keep each lesson focused on one outcome, demonstrate rather than only explain, and avoid promising results that cannot be guaranteed.";
+    return out + "\n\nFINAL PROJECT\nComplete one small real-world task related to " + topic + ". Include the starting point, the steps taken, the result, and one improvement for a second attempt." +
+      "\n\nASSESSMENT CHECKLIST\n1. Can the learner explain the main idea in their own words?\n2. Can they demonstrate the process without copying every line?\n3. Does their result meet the stated outcome?\n4. Can they identify one mistake and how to correct it?" +
+      "\n\nCREATOR NOTE\nReplace the demonstration prompts with accurate subject-specific examples before teaching. Do not present this outline as a finished expert course until the examples, instructions, and assessment have been completed.";
   }
   function story(thought, tone) {
     const idea = clean(thought);
-    return "THE SITUATION\n" + idea +
-      "\n\nTHE TENSION\nWhat made this situation difficult, surprising, or important? Explain the obstacle without exaggerating." +
-      "\n\nTHE TURNING POINT\nDescribe the realisation, choice, or small action that changed how you understood the situation." +
-      "\n\nTHE LESSON\nExplain what someone else can learn from it and where the lesson may not apply." +
-      "\n\nTHE CLOSE\n" + (endings[tone] || endings.natural);
+    const personal = firstPersonRisk(idea);
+    return "THE REAL STARTING POINT\n" + idea +
+      "\n\nTHE TENSION\nWhat was uncertain, difficult, or at stake? Add only details that really happened or that you can verify. If this is an idea rather than a personal experience, describe the general challenge instead." +
+      "\n\nTHE TURNING POINT\nWhat changed your understanding, or what practical choice could move the situation forward? Use a real moment; do not invent a dramatic event just to make the story stronger." +
+      "\n\nTHE LESSON\nState the lesson in one clear sentence. Explain who it may help and what the listener could try." +
+      "\n\nTHE CLOSE\n" + (personal
+        ? "Before publishing, check that every first-person detail is true to your experience. Remove or rewrite anything that did not happen."
+        : "If you want this to become a personal story, add the real people, moment, and decision behind the idea. Until then, present it as a reflection, not a claimed personal experience.") +
+      "\n\nOPTIONAL DELIVERY NOTE\n" + (tone === "bold" ? "Keep the delivery direct; pause after the main lesson." : tone === "helpful" ? "Explain the lesson slowly and give the audience one practical step." : "Use your everyday speaking voice and leave space after the key point.");
   }
   function lesson(thought) {
     const idea = clean(thought);
     return "LESSON: " + idea +
-      "\n\n1. LEARNING GOAL\nBy the end, the learner should be able to explain the idea and try one practical step." +
-      "\n\n2. EXPLAIN\nDefine the idea in everyday language. Introduce only the terms needed to understand it." +
-      "\n\n3. DEMONSTRATE\nShow a realistic example, then explain why each step matters." +
-      "\n\n4. PRACTISE\nAsk the learner to try the same process with their own situation." +
-      "\n\n5. CHECK UNDERSTANDING\nAsk the learner to explain the idea in their own words and identify one next action." +
-      "\n\n6. RECAP\nSummarise the most important point and name one common mistake to avoid.";
+      "\n\nLEARNING GOAL\nBy the end, learners should be able to explain the idea and complete one small task connected to it." +
+      "\n\nEXPLAIN\nAsk learners what they already know. Define the central idea in plain language and connect it to a situation they recognise: " + idea + "." +
+      "\n\nDEMONSTRATE\nWork through one example related to the idea. Say why you choose each step, and point out one common mistake without assuming every learner will face the same problem." +
+      "\n\nPRACTISE\nGive learners a small version of the task to complete themselves. Ask them to write down the step they took and the result they observed." +
+      "\n\nCHECK UNDERSTANDING\nAsk learners to explain the idea in their own words, demonstrate the first step, and say how they would know whether it worked." +
+      "\n\nRECAP\nSummarise the main point in one sentence. End by asking learners to choose one realistic next action and identify what support they may need.";
   }
   function generate(options) {
     const thought = clean(options && options.thought);
@@ -127,14 +166,9 @@
     return { script, caption: caption(thought), format, componentCount: components.length };
   }
   root.TTVContentEngine = {
-    version: "1.0.0",
-    componentCount: components.length,
-    components: components.slice(),
-    generate,
-    caption: raw => caption(clean(raw)),
-    video: (raw, tone, creator) => video(raw, tone, creator),
-    course: (raw, full) => course(raw, full),
-    story: (raw, tone) => story(raw, tone),
-    lesson: raw => lesson(raw)
+    version: "1.1.0", componentCount: components.length, components: components.slice(), generate,
+    component: (family, seed) => component(clean(family), clean(seed)),
+    caption: raw => caption(clean(raw)), video: (raw, tone, creator) => video(raw, tone, creator),
+    course: (raw, full) => course(raw, full), story: (raw, tone) => story(raw, tone), lesson: raw => lesson(raw)
   };
 })(typeof window !== "undefined" ? window : globalThis);
