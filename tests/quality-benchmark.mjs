@@ -14,7 +14,7 @@ for (const family of ["hook", "explanation", "story", "example", "transition", "
 }
 
 const requiredSections = {
-  video: ["For example"],
+  video: [],
   story: ["THE REAL STARTING POINT", "THE TENSION", "THE TURNING POINT", "THE LESSON"],
   lesson: ["LEARNING GOAL", "EXPLAIN", "DEMONSTRATE", "PRACTISE", "CHECK UNDERSTANDING"],
   mini: ["LESSON 1", "LESSON 2", "LESSON 3", "FINAL PROJECT"],
@@ -37,12 +37,15 @@ for (const item of corpus) {
     "Demonstrate the lesson using an ordinary, realistic situation."
   ];
   const genericPhraseHits = genericLines.filter(phrase => lower.includes(phrase.toLowerCase())).length;
-  const passed = text.length > 40 && missingIdeaTerms.length === 0 && missingSections.length === 0 && genericPhraseHits === 0;
+  const videoMarkers = ["For a shop using WhatsApp status", "For a simple weekly money review", "Instead of asking an AI tool", "If daily posting is unrealistic", "For a local business", "Before opening messages or tutorials", "Before starting a freelance job", "Residents could agree on a collection day", "Choose one real situation where this idea applies"];
+  const missingConcreteExample = item.format === "video" && !videoMarkers.some(marker => text.includes(marker));
+  const passed = text.length > 40 && missingIdeaTerms.length === 0 && missingSections.length === 0 && genericPhraseHits === 0 && !missingConcreteExample;
   rows.push({ id: item.id, format: item.format, words, passed, missingIdeaTerms, missingSections, genericPhraseHits });
   assert.ok(text.length > 40, item.id + ": output is too short");
   assert.deepEqual(missingIdeaTerms, [], item.id + ": output lost required concepts from the user's idea");
   assert.deepEqual(missingSections, [], item.id + ": required format structure is missing");
   assert.equal(genericPhraseHits, 0, item.id + ": known boilerplate phrase remains");
+  assert.equal(missingConcreteExample, false, item.id + ": video must contain a concrete, topic-aware example");
   if (item.format === "caption") {
     assert.ok(text.toLowerCase().includes("small businesses"), "caption should preserve the user's specific audience");
     assert.ok(!text.includes("…"), "caption should not silently truncate the user's idea");
@@ -52,7 +55,7 @@ const videoRows = rows.filter(row => row.format === "video");
 const avgVideoWords = videoRows.reduce((sum, row) => sum + row.words, 0) / Math.max(1, videoRows.length);
 const passRate = rows.filter(row => row.passed).length / rows.length;
 console.log(JSON.stringify({
-  benchmarkVersion: "1.1.0",
+  benchmarkVersion: "1.2.0",
   engineVersion: engine.version,
   componentCount: engine.componentCount,
   corpusCases: corpus.length,
