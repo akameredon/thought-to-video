@@ -84,3 +84,44 @@ Latest CI run: https://github.com/akameredon/thought-to-video/actions/runs/38775
 - All 12 benchmark cases passed the repository's automated structural, selected-term, and boilerplate checks.
 - Manual review scores have not yet been repeated for this version. Automated pass status is not evidence that the release quality gate has been met.
 - Video output remains uneven in length: several samples are under 120 words. Do not pad mechanically; the next review should assess whether each short script needs a stronger idea-specific explanation or should remain concise.
+
+
+## Re-review after topic-routing fixes — engine 1.4.3
+
+Reviewed the current output from all 12 corpus prompts on commit `f9d744985c98d43b2ff8ea001f65f7f3c645b75a`. The latest automated smoke-test workflow for this commit passed: https://github.com/akameredon/thought-to-video/actions/runs/38776657690
+
+The following scores are a **provisional model-assisted re-score**, not independent human-user research. They are intended to decide what to fix next, not to claim release readiness.
+
+| Sample | Format | Provisional score / 40 | Faithfulness / 5 | Main remaining issue |
+|---|---|---:|---:|---|
+| small-business | Video | 30 | 4 | Stronger specific advice, but still shorter than a full 60-second script and the opening is not very surprising. |
+| saving-money | Video | 29 | 4 | Sensible caution and practical steps; could explain how to review the seven-day record without repeating the advice. |
+| learning-ai | Video | 30 | 4 | The AI example is now topic-matched; still needs a sharper demonstration of checking an actual answer. |
+| personal-story | Story builder | 22 | 4 | Honest about missing facts, but remains a fill-in structure rather than a publish-ready story. |
+| teach-pricing | Lesson | 31 | 4 | Includes a worked cost calculation; needs a separate market-check example and a learner answer/check rubric. |
+| mini-course-content | Mini-course | 25 | 4 | The sequence is relevant, but several practice tasks simply repeat the outcome and the creator note confirms it is not teaching-ready. |
+| full-course-budget | Course | 26 | 4 | Useful sequence, but the demonstrations still do not form a complete worked budget with sample amounts and answer guidance. |
+| creator-consistency | Video | 29 | 4 | Realistic schedule example; script remains short and could distinguish a sustainable schedule from a content-quality check more clearly. |
+| community-cleanup | Story builder | 21 | 4 | Avoids invented events, but has no real turning point until the user supplies one. |
+| freelancer-boundaries | Lesson | 31 | 4 | The example now matches scope boundaries; add a checklist showing whether a sample agreement is complete. |
+| caption-launch | Caption | 30 | 4 | The call to action is launch-oriented; it still needs the actual product promise or access step from the user to become campaign-ready. |
+| long-thought | Video | 31 | 4 | The central point and concrete action are preserved; further editing can reduce formulaic phrasing. |
+
+**Provisional average: 27.9 / 40. Release gate remains unmet.** The strongest improvement is that lesson examples now match the topic instead of mixing pricing, budgeting, and freelancer advice. Stories and courses remain the weakest formats, and the videos are often concise rather than fully developed for a 60-second delivery.
+
+### Changes in this pass
+
+- Removed the unrelated budgeting demonstration from lesson outputs; the lesson now uses the topic-matched worked example.
+- Prioritized the freelancer scope-confirmation example before generic pricing logic.
+- Prioritized AI examples before generic learning examples in video demonstration routing.
+- Replaced repeated video action wording with a topic-specific supporting detail.
+- Made launch-related captions prompt for a clear audience promise and next step.
+- Added regression assertions for pricing examples, freelancer scope wording, and AI-specific examples.
+- Confirmed all 12 generated outputs retained their required corpus terms and the latest workflow completed successfully.
+
+### Next quality work
+
+1. Replace repeated course practice prompts with distinct, observable learner tasks and add worked budget figures with explicit sample assumptions.
+2. Offer story modes that distinguish a personal story (requires verified details) from a general illustrative narrative, without inventing a user's lived experience.
+3. Expand short video scripts only when the original idea supports a useful explanation, counterexample, or decision rule; do not pad to hit a word count.
+4. Add a manual review with real creators before declaring the manual quality gate passed.
