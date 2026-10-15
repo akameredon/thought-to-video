@@ -2,20 +2,42 @@ import { readFileSync } from "node:fs";
 import { Script, runInNewContext } from "node:vm";
 import assert from "node:assert/strict";
 
+const root = new URL("../", import.meta.url);
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/i);
-assert.ok(scriptMatch, "index.html must contain the app script");
-assert.doesNotThrow(() => new Script(scriptMatch[1]), "app JavaScript must parse");
+const engineSource = readFileSync(new URL("../content-engine.js", import.meta.url), "utf8");
+const swSource = readFileSync(new URL("../sw.js", import.meta.url), "utf8");
+const appMatch = html.match(/<script>([\s\S]*?)<\/script>/i);
+assert.ok(appMatch, "index.html must contain the app script");
+assert.doesNotThrow(() => new Script(engineSource), "content engine JavaScript must parse");
+assert.doesNotThrow(() => new Script(appMatch[1]), "app JavaScript must parse");
 
-const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
+const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(new Set(ids).size, ids.length, "HTML element IDs must be unique");
-const referencedIds = [...scriptMatch[1].matchAll(/\$\("([^"]+)"\)/g)].map((match) => match[1]);
-const missingIds = [...new Set(referencedIds.filter((id) => !ids.includes(id)))];
-assert.deepEqual(missingIds, [], "all JavaScript-referenced element IDs must exist in HTML");
-
-for (const required of ["thought", "generate", "script", "enableCamera", "start", "stop", "playback"]) {
-  assert.ok(ids.includes(required), "expected required app control: " + required);
+const refs = [...appMatch[1].matchAll(/\$\("([^"]+)"\)/g)].map(match => match[1]);
+assert.deepEqual([...new Set(refs.filter(id => !ids.includes(id)))], [], "all JavaScript-referenced IDs must exist");
+for (const format of ["video", "story", "lesson", "mini", "course"]) {
+  assert.ok(html.includes('value="' + format + '"'), "UI should offer " + format + " format");
 }
+
+const window = {};
+runInNewContext(engineSource, { window, globalThis: window });
+const engine = window.TTVContentEngine;
+assert.ok(engine, "engine should expose its public interface");
+assert.equal(engine.componentCount, 1000, "engine should register 1,000 reusable logic components");
+assert.equal(new Set(engine.components.map(item => item.id)).size, 1000, "component IDs should be unique");
+assert.equal(new Set(engine.components.map(item => item.family)).size, 10, "components should span ten families");
+
+const sample = "I want to explain why saving money matters.";
+for (const format of ["video", "story", "lesson", "mini", "course"]) {
+  const result = engine.generate({ thought: sample, tone: "helpful", format });
+  assert.ok(result.script.length > 100, format + " should produce a useful draft");
+  assert.ok(result.caption.includes("#ThoughtToVideo"), format + " should include a caption");
+  assert.equal(result.componentCount, 1000);
+}
+assert.ok(engine.generate({ thought: sample, format: "story" }).script.includes("THE TURNING POINT"), "story format should include a turning point");
+assert.ok(engine.generate({ thought: sample, format: "lesson" }).script.includes("LEARNING GOAL"), "lesson format should include a learning goal");
+assert.ok(engine.generate({ thought: sample, format: "course" }).script.includes("LESSON 6"), "full course should include six lessons");
+assert.equal(engine.generate({ thought: "  ", format: "video" }).script, "", "empty input should return an empty script");
 
 const controls = Object.fromEntries(ids.map(id => [id, {
   value: "", textContent: "", disabled: false,
@@ -23,67 +45,47 @@ const controls = Object.fromEntries(ids.map(id => [id, {
   classList: { add() {}, remove() {} },
   scrollIntoView() {}, addEventListener() {}
 }]));
-let fetchCalls = 0;
-let failAI = false;
-let sentBody;
-const alerts = [];
-runInNewContext(scriptMatch[1].split("const SR=")[0], {
+let localStorageWrites = 0;
+const context = {
+  window,
   document: { getElementById: id => controls[id] },
-  localStorage: { setItem() {} },
-  alert: message => alerts.push(message),
-  AbortController,
-  setTimeout,
-  clearTimeout,
-  fetch: async (_url, options) => {
-    fetchCalls++;
-    sentBody = JSON.parse(options.body);
-    return {
-      ok: !failAI,
-      status: failAI ? 502 : 200,
-      text: async () => JSON.stringify(failAI
-        ? { error: "Providers unavailable" }
-        : {
-            script: "Education helps people learn.",
-            caption: "A simple, useful caption.",
-            provider: "Gemini"
-          })
-    };
-  }
-});
-
+  localStorage: { setItem() { localStorageWrites++; } },
+  navigator: { onLine: false },
+  console
+};
+runInNewContext(appMatch[1].split("const SR=")[0], context);
 controls.thought.value = "   Education   helps people learn.   ";
 controls.contentType.value = "video";
+controls.tone.value = "helpful";
 await controls.generate.onclick();
-assert.equal(fetchCalls, 1, "generation should call the server-side AI endpoint once");
-assert.equal(sentBody.thought, "Education helps people learn.", "thought whitespace should be normalized");
-assert.equal(controls.script.value, "Education helps people learn.", "AI script should be displayed");
-assert.equal(controls.caption.value, "A simple, useful caption.", "AI caption should be displayed");
-assert.equal(controls.count.textContent, "4 words · about 2 seconds", "word count should work");
-assert.equal(controls.prompterText.textContent, "Education helps people learn.", "teleprompter should match the script");
-assert.equal(controls.outputHint.textContent.includes("about 60 seconds"), true, "video output should show its intended duration");
+assert.equal(controls.outputTitle.textContent, "Your talking script");
+assert.ok(controls.script.value.includes("For example"), "video draft should include a practical example");
+assert.ok(controls.caption.value.includes("#ThoughtToVideo"), "app should show a generated caption");
+assert.ok(controls.outputHint.textContent.includes("without an AI API"), "app should explain local generation");
+assert.ok(localStorageWrites > 0, "draft should be saved locally");
+assert.equal(controls.count.textContent.includes("words"), true, "word count should update");
+assert.equal(controls.prompterText.textContent, controls.script.value, "teleprompter should match the script");
 
-failAI = true;
-controls.thought.value = "I want to explain why saving money matters.";
-await controls.generate.onclick();
-assert.equal(fetchCalls, 2, "a second valid idea should retry the server endpoint");
-assert.ok(controls.outputHint.textContent.includes("without an AI API"), "provider failure should switch to the on-device writer");
-assert.ok(controls.script.value.includes("For example, take the idea"), "offline script should include a practical example");
-assert.ok(controls.caption.value.includes("#ThoughtToVideo"), "offline mode should create a caption");
-
-controls.thought.value = "   ";
-await controls.generate.onclick();
-assert.equal(fetchCalls, 2, "empty input must not call the AI endpoint");
-assert.ok(controls.thought.focused, "empty input should focus the thought field");
-assert.deepEqual(alerts, [], "valid input should not trigger error alerts");
-
-console.log("Smoke tests passed: syntax, unique IDs, AI generation, offline fallback, whitespace cleanup, word count, captions, teleprompter, and empty input.");
+for (const [format, title] of [
+  ["story", "Your story structure"],
+  ["lesson", "Your teaching lesson"],
+  ["mini", "Your mini-course"],
+  ["course", "Your course outline"]
+]) {
+  controls.contentType.value = format;
+  await controls.generate.onclick();
+  assert.equal(controls.outputTitle.textContent, title, "app title should match " + format);
+  assert.ok(controls.script.value.length > 100, "app should generate " + format + " locally");
+}
+assert.ok(html.includes('src="./content-engine.js"'), "app must load the content engine");
+assert.ok(!html.includes('fetch("/.netlify/functions/generate"'), "default generation must not require a remote API");
 
 const handlers = {};
 const cachedPage = { offline: true };
 const freshPage = { ok: true, clone: () => ({ fresh: true }) };
 let offline = false;
 let cachedUpdate;
-runInNewContext(readFileSync(new URL("../sw.js", import.meta.url), "utf8"), {
+runInNewContext(swSource, {
   URL,
   self: {
     location: { origin: "https://example.com" },
@@ -95,6 +97,8 @@ runInNewContext(readFileSync(new URL("../sw.js", import.meta.url), "utf8"), {
   },
   fetch: async () => { if (offline) throw new Error("Offline"); return freshPage; }
 });
+assert.ok(swSource.includes("./content-engine.js"), "service worker should precache the engine");
+assert.ok(swSource.includes("thought-to-video-v5"), "service worker cache version should be bumped");
 async function navigate() {
   let response;
   handlers.fetch({
@@ -103,8 +107,9 @@ async function navigate() {
   });
   return response;
 }
-assert.equal(await navigate(), freshPage, "online navigation should bypass stale cached HTML");
+assert.equal(await navigate(), freshPage, "online navigation should use the latest page");
 assert.ok(cachedUpdate.fresh, "latest page should refresh the offline copy");
 offline = true;
-assert.equal(await navigate(), cachedPage, "offline navigation should keep the app available");
-console.log("Regression tests passed: fresh pages and offline fallback.");
+assert.equal(await navigate(), cachedPage, "offline navigation should use the cached shell");
+
+console.log("Smoke tests passed: 1,000 components, five formats, local-first generation, captions, draft saving, teleprompter, syntax, IDs, and offline cache.");
