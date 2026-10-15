@@ -102,7 +102,7 @@ function parseOutput(raw) {
   return { script, caption };
 }
 
-export default async (request) => {
+export const handler = async (request) => {
   if (request.httpMethod === "OPTIONS") return json(204, {});
   if (request.httpMethod !== "POST") return json(405, { error: "Use POST to generate content." });
 
