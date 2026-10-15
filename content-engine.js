@@ -247,12 +247,14 @@
   }
   function lessonWorkedExample(idea) {
     const lower = idea.toLowerCase();
-    if (/price|pricing|service|freelance|cost/.test(lower))
+    if (/freelancer|deadline|revision|scope|payment/.test(lower))
+      return "Worked example: 'I will deliver one edited 60-second video by Friday. The agreed fee includes one revision. Work begins after the agreed deposit; extra edits or new deliverables will be quoted separately.' Confirm that the wording matches the actual agreement before sending it.";
+    if (/price|pricing|cost|rate/.test(lower))
       return "Worked example: suppose a service costs 4,000 in direct expenses and takes 3 hours. If the provider values their time at 2,000 per hour, the starting cost calculation is 4,000 + (3 × 2,000) = 10,000 before taxes, overhead, or profit. This is an illustration, not a market price; replace it with your own figures and check what the offer includes.";
     if (/budget|spending|saving|income|bills|money/.test(lower))
       return "Worked example: list the income you actually expect, subtract essential bills due before the next income date, and treat the remainder as a planning figure rather than money automatically available to spend. Use confirmed amounts and leave unknowns clearly marked.";
-    if (/freelancer|deadline|revision|scope|payment/.test(lower))
-      return "Worked example: 'I will deliver one edited 60-second video by Friday. The price includes one revision. Work begins after the agreed deposit; additional edits or new deliverables will be quoted separately.' Adjust the terms to the actual agreement and local law.";
+    if (/content|social media|post|creator|audience/.test(lower))
+      return "Worked example: a small shop plans a week of posts. Monday answers a common customer question, Wednesday shows one available product with a confirmed price, and Friday explains how to order. Each post has a different job and uses only verified details.";
     return "Worked example: choose a small, real case related to the idea. State the starting information, explain each decision, show the result, and point out one assumption the learner should verify.";
   }
   function lesson(thought) {
@@ -260,7 +262,7 @@
     return "LESSON: " + idea +
       "\n\nLEARNING GOAL\nBy the end, learners should be able to explain the idea and complete one small task connected to it." +
       "\n\nEXPLAIN\nAsk learners what they already know. Define the central idea in plain language and connect it to a situation they recognise: " + idea + "." +
-      "\n\nDEMONSTRATE\n" + demonstrationFor(idea) + "\n" + lessonWorkedExample(idea) + "\nExplain why each step matters and identify one common mistake to avoid." +
+      "\n\nDEMONSTRATE\n" + lessonWorkedExample(idea) + "\nExplain why each step matters and identify one common mistake to avoid." +
       "\n\nPRACTISE\n" + practiceFor(idea) +
       "\n\nCHECK UNDERSTANDING\nAsk learners to explain the idea in their own words, demonstrate the first step, and say how they would know whether it worked." +
       "\n\nRECAP\nSummarise the main point in one sentence. End by asking learners to choose one realistic next action and identify what support they may need.";
