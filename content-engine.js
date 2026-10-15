@@ -28,15 +28,16 @@
     const topic = clean(raw);
     if (!topic) return "";
     const first = sentences(topic)[0] || topic;
-    const prompt = /\b(price|pricing|cost|money|saving|budget|spend|income|profit)\b/i.test(topic)
-      ? "What is one money decision you could review this week?"
-      : /\b(business|customer|client|sales|product|service|shop)\b/i.test(topic)
-        ? "Which part could you try in your business first?"
-        : /\b(learn|teach|lesson|course|student|skill|practice)\b/i.test(topic)
-          ? "What would you want to practise first?"
-          : /\b(content|post|video|creator|audience|social media)\b/i.test(topic)
-            ? "What is one useful idea you could share next?"
-            : "Which part of this idea feels most useful to you?";
+    const lower = topic.toLowerCase();
+    const prompt = /\b(price|pricing|cost|money|saving|budget|spend|income|profit)\b/.test(lower)
+      ? "Try this: review one real expense or money decision this week, using your actual numbers."
+      : /\b(business|customer|client|sales|product|service|shop|whatsapp)\b/.test(lower)
+        ? "Try this: choose one customer question and make your next post answer it clearly."
+        : /\b(learn|teach|lesson|course|student|skill|practice|practise|ai)\b/.test(lower)
+          ? "Try this: practise one small task, then check your result before moving on."
+          : /\b(content|post|video|creator|audience|social media)\b/.test(lower)
+            ? "Try this: write one clear message for one specific audience before choosing the format."
+            : "Try this: choose one small action that follows from the idea, and notice what changes.";
     const body = topic.length > first.length + 8 ? topic.slice(first.length).trim() : "";
     return first + (body ? "\n\n" + body : "") + "\n\n" + prompt + "\n\n#ThoughtToVideo";
   }
@@ -148,6 +149,32 @@
     sections.push(close);
     return sections.join("\n\n");
   }
+  function courseDemonstration(topic, lesson, index) {
+    const lower = topic.toLowerCase();
+    if (/content|social media|post|creator|audience/.test(lower)) {
+      const examples = [
+        "Sample: a neighbourhood bakery wants more weekday orders. Name the customer group first, such as nearby workers who need a quick lunch.",
+        "Sample: give the bakery three distinct post purposes: answer a question about opening hours, show today's products, and explain how to place an order.",
+        "Sample: turn 'people ask if delivery is available' into a post that states the delivery area, fee if confirmed, and how to order.",
+        "Sample: place the question-answer post on Monday, product demonstration on Wednesday, and ordering details on Friday; use the other days only if there is something useful to say.",
+        "Sample: check the draft for a clear product, accurate price and availability, understandable wording, and one ordering step.",
+        "Sample: review enquiries and repeated questions after a week; use those signals to decide what to explain next, rather than assuming likes equal sales."
+      ];
+      return examples[index % examples.length];
+    }
+    if (/budget|spending|bills|saving|income|money/.test(lower)) {
+      const examples = [
+        "Sample: write down the dates income is expected and the dates rent, transport, food, and other essential bills must be paid; leave unknown amounts blank until confirmed.",
+        "Sample: mark food and required transport as essential for this exercise, while separating a non-urgent purchase for review. The categories depend on the learner's real needs.",
+        "Sample: record a real expense as date, item, amount, and category; use the amount actually paid, not an invented estimate.",
+        "Sample: compare the date a bill is due with the next expected income date. If income arrives later, identify the gap early and consider safe, realistic options.",
+        "Sample: choose one flexible expense to examine, then compare its real cost with the value it provides before deciding whether to change it.",
+        "Sample: compare planned spending with the week's actual entries, explain any difference, and carry forward only a change that remains realistic."
+      ];
+      return examples[index % examples.length];
+    }
+    return "Worked example: model the task described in this lesson using a clearly identified sample. Explain each decision, state any assumptions, and show learners how to check the result.";
+  }
   function course(thought, full) {
     const topic = clean(thought).replace(/[.!?]+$/, "");
     const lowerTopic = topic.toLowerCase();
@@ -194,9 +221,13 @@
     lessons.forEach((lesson, index) => {
       out += "\n\nLESSON " + (index + 1) + ": " + lesson[0] +
         "\nOutcome: " + lesson[1] +
-        "\nDemonstration: " + demonstrationFor(topic) +
-        "\nPractice: " + practiceFor(topic) +
-        "\nCheck: Ask learners to show or explain what they did, then compare it with the lesson outcome.";
+        "\nDemonstration: " + courseDemonstration(topic, lesson, index) +
+        "\nPractice: Complete this task: " + lesson[1] +
+        "\nCheck: " + (index === 0
+          ? "Can the learner show the starting information and explain what is known versus unknown?"
+          : index === lessons.length - 1
+            ? "Can the learner explain what changed, support the conclusion with their own records, and name one next improvement?"
+            : "Can the learner complete the task without copying the example and explain why the chosen step fits the goal?");
     });
     return out + "\n\nFINAL PROJECT\nComplete one small real-world task related to " + topic + ". Include the starting point, the steps taken, the result, and one improvement for a second attempt." +
       "\n\nASSESSMENT CHECKLIST\n1. Can the learner explain the main idea in their own words?\n2. Can they demonstrate the process without copying every line?\n3. Does their result meet the stated outcome?\n4. Can they identify one mistake and how to correct it?" +
@@ -239,7 +270,7 @@
     return { script, caption: caption(thought), format, componentCount: components.length };
   }
   root.TTVContentEngine = {
-    version: "1.3.1", componentCount: components.length, components: components.slice(), generate,
+    version: "1.4.0", componentCount: components.length, components: components.slice(), generate,
     component: (family, seed) => component(clean(family), clean(seed)),
     caption: raw => caption(clean(raw)), video: (raw, tone, creator) => video(raw, tone, creator),
     course: (raw, full) => course(raw, full), story: (raw, tone) => story(raw, tone), lesson: raw => lesson(raw)
