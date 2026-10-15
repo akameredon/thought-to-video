@@ -8,39 +8,51 @@ const window = {};
 runInNewContext(engineSource, { window, globalThis: window });
 const engine = window.TTVContentEngine;
 assert.ok(engine, "content engine must expose TTVContentEngine");
+assert.equal(engine.componentCount, 1000, "expected 1,000 registered components");
+for (const family of ["hook", "explanation", "story", "example", "transition", "conclusion", "lesson", "course", "caption", "quality"]) {
+  assert.equal(engine.component(family, "benchmark-seed").family, family, "component lookup must return the requested family");
+}
 
 const requiredSections = {
   video: ["For example"],
-  story: ["THE SITUATION", "THE TENSION", "THE TURNING POINT", "THE LESSON"],
+  story: ["THE REAL STARTING POINT", "THE TENSION", "THE TURNING POINT", "THE LESSON"],
   lesson: ["LEARNING GOAL", "EXPLAIN", "DEMONSTRATE", "PRACTISE", "CHECK UNDERSTANDING"],
   mini: ["LESSON 1", "LESSON 2", "LESSON 3", "FINAL PROJECT"],
-  course: ["LESSON 1", "LESSON 6", "FINAL PROJECT", "CHECK FOR UNDERSTANDING"],
+  course: ["LESSON 1", "LESSON 6", "FINAL PROJECT", "ASSESSMENT CHECKLIST"],
   caption: ["#ThoughtToVideo"]
 };
 const rows = [];
 for (const item of corpus) {
-  const format = item.format === "caption" ? "video" : item.format;
   const result = item.format === "caption"
     ? { script: engine.caption(item.thought), caption: engine.caption(item.thought) }
-    : engine.generate({ thought: item.thought, format, tone: "helpful" });
+    : engine.generate({ thought: item.thought, format: item.format, tone: "helpful" });
   const text = result.script || "";
   const lower = text.toLowerCase();
   const missingIdeaTerms = item.mustContain.filter(term => !lower.includes(term.toLowerCase()));
-  const missingSections = (requiredSections[item.format] || []).filter(section => !text.toLowerCase().includes(section.toLowerCase()));
+  const missingSections = (requiredSections[item.format] || []).filter(section => !lower.includes(section.toLowerCase()));
   const words = text.trim().split(/\s+/).filter(Boolean).length;
-  const genericLines = ["A thought worth sharing", "What’s your take?", "Demonstrate the lesson using an ordinary, realistic situation."];
+  const genericLines = [
+    "A thought worth sharing",
+    "What’s your take? Share it in the comments.",
+    "Demonstrate the lesson using an ordinary, realistic situation."
+  ];
   const genericPhraseHits = genericLines.filter(phrase => lower.includes(phrase.toLowerCase())).length;
-  const passed = text.length > 40 && missingIdeaTerms.length === 0 && missingSections.length === 0;
+  const passed = text.length > 40 && missingIdeaTerms.length === 0 && missingSections.length === 0 && genericPhraseHits === 0;
   rows.push({ id: item.id, format: item.format, words, passed, missingIdeaTerms, missingSections, genericPhraseHits });
   assert.ok(text.length > 40, item.id + ": output is too short");
   assert.deepEqual(missingIdeaTerms, [], item.id + ": output lost required concepts from the user's idea");
   assert.deepEqual(missingSections, [], item.id + ": required format structure is missing");
+  assert.equal(genericPhraseHits, 0, item.id + ": known boilerplate phrase remains");
+  if (item.format === "caption") {
+    assert.ok(text.toLowerCase().includes("small businesses"), "caption should preserve the user's specific audience");
+    assert.ok(!text.includes("…"), "caption should not silently truncate the user's idea");
+  }
 }
 const videoRows = rows.filter(row => row.format === "video");
 const avgVideoWords = videoRows.reduce((sum, row) => sum + row.words, 0) / Math.max(1, videoRows.length);
 const passRate = rows.filter(row => row.passed).length / rows.length;
 console.log(JSON.stringify({
-  benchmarkVersion: "1.0.0",
+  benchmarkVersion: "1.1.0",
   engineVersion: engine.version,
   componentCount: engine.componentCount,
   corpusCases: corpus.length,
@@ -50,4 +62,4 @@ console.log(JSON.stringify({
   genericPhraseHits: rows.reduce((sum, row) => sum + row.genericPhraseHits, 0),
   cases: rows
 }, null, 2));
-console.log("Quality benchmark passed: required idea terms and format structures retained for all corpus cases.");
+console.log("Quality benchmark passed: selected idea terms, format structures, component family selection, and boilerplate checks passed.");
