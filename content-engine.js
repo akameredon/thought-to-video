@@ -80,6 +80,8 @@
       return "If daily posting is unrealistic, choose two repeatable days each week and prepare a small batch in advance. Keep the schedule only if you can maintain useful quality without exhausting yourself.";
     if (/\b(money|saving|budget|income|price|pricing|profit|bill|expenses?|spending)\b/.test(lower))
       return "For a simple weekly money review, write down each expense for seven days, group essentials separately from optional spending, then choose one change you can realistically keep. Do not set a savings target until you know what is left after essential bills.";
+    if (/\b(education|learn|learning|teach|student|skill|course|practice|practise)\b/.test(lower))
+      return "For example, if you are learning a new skill, practise one small task, compare your result with a clear standard, and note one thing to improve.";
     if (/\b(ai|programmer|prompt|technology)\b/.test(lower))
       return "Instead of asking an AI tool to 'help with my business', describe one real task, the audience, the constraints, and the format you need. Then verify names, figures, and claims before using its answer.";
     if (/\b(content|post|video|creator|audience|social media)\b/.test(lower))
