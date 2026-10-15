@@ -30,12 +30,15 @@ runInNewContext(scriptMatch[1].split("const SR=")[0], {
   document: { getElementById: id => controls[id] },
   localStorage: { setItem() {} },
   alert: message => alerts.push(message),
+  AbortController,
+  setTimeout,
+  clearTimeout,
   fetch: async (_url, options) => {
     fetchCalls++;
     sentBody = JSON.parse(options.body);
     return {
       ok: true,
-      json: async () => ({
+      text: async () => JSON.stringify({
         script: "Education helps people learn.",
         caption: "A simple, useful caption.",
         provider: "Gemini"
