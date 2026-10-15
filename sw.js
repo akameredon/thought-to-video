@@ -1,4 +1,4 @@
-const CACHE = "thought-to-video-v3";
+const CACHE = "thought-to-video-v4";
 const ASSETS = ["./", "./index.html", "./manifest.json"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE)
