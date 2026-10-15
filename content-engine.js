@@ -42,19 +42,20 @@
   }
   function makeHook(idea, tone) {
     const first = (sentences(idea)[0] || idea).replace(/[.!?]+$/, "");
+    const lead = /^I\b/.test(first) ? first : first.charAt(0).toLowerCase() + first.slice(1);
     const lower = idea.toLowerCase();
     if (/\bnot\b.{0,70}\bbefore\b/.test(lower)) return first + ".";
     if (/\b(difficult|hard|struggle|problem|mistake|waste|delay|stuck)\b/.test(lower)) {
       return choose([
-        "If this has been harder than it should be, start here: " + first.charAt(0).toLowerCase() + first.slice(1) + ".",
+        "If this has been harder than it should be, start here: " + lead + ".",
         "The problem is not always a lack of effort. " + first + ".",
-        "Here is the part of this problem worth paying attention to: " + first.charAt(0).toLowerCase() + first.slice(1) + "."
+        "Here is the part of this problem worth paying attention to: " + lead + "."
       ], idea + tone);
     }
     if (/\b(when|if|because|means|matters|believe|think)\b/.test(lower)) return first + ".";
-    if (tone === "bold") return "Let’s get to the point: " + first.charAt(0).toLowerCase() + first.slice(1) + ".";
-    if (tone === "helpful") return "Here is a practical way to look at it: " + first.charAt(0).toLowerCase() + first.slice(1) + ".";
-    if (tone === "story") return "Start with the real moment behind this idea: " + first.charAt(0).toLowerCase() + first.slice(1) + ".";
+    if (tone === "bold") return "Let’s get to the point: " + lead + ".";
+    if (tone === "helpful") return "Here is a practical way to look at it: " + lead + ".";
+    if (tone === "story") return "Start with the real moment behind this idea: " + lead + ".";
     return first + ".";
   }
   function actionLine(idea) {
@@ -79,9 +80,10 @@
       return "For a simple weekly money review, write down each expense for seven days, group essentials separately from optional spending, then choose one change you can realistically keep. Do not set a savings target until you know what is left after essential bills.";
     if (/\b(ai|programmer|prompt|technology)\b/.test(lower))
       return "Instead of asking an AI tool to 'help with my business', describe one real task, the audience, the constraints, and the format you need. Then verify names, figures, and claims before using its answer.";
+    if (/\b(consisten|schedule|every day|posting)\b/.test(lower))
+      return "If daily posting is unrealistic, choose two repeatable days each week and prepare a small batch in advance. Keep the schedule only if you can maintain useful quality without exhausting yourself.";
     if (/\b(content|post|video|creator|audience|social media)\b/.test(lower))
       return "For a local business, plan one post that answers a customer question, one that demonstrates the product, and one that explains how to buy. Put each on the calendar only if it serves a clear audience need.";
-    if (/\b(consisten|schedule|every day|posting)\b/.test(lower))
       return "If daily posting is unrealistic, choose two repeatable days each week and prepare a small batch in advance. Keep the schedule only if you can maintain useful quality without exhausting yourself.";
     if (/\b(movement|progress|focus|task|plan|time)\b/.test(lower))
       return "Before opening messages or tutorials, write down the one deliverable that would make today successful. Work on it for a protected 25-minute block, then record whether the deliverable moved forward.";
@@ -130,7 +132,6 @@
           ? "When teaching this, give people a chance to try the idea rather than only hear about it."
           : "";
     const second = parts.length > 1 ? parts.slice(1).join(" ") : "";
-    const action = actionLine(idea);
     const close = tone === "bold"
       ? "Choose one step and do it before adding another." 
       : tone === "story"
@@ -140,7 +141,6 @@
           : "What is one realistic step you can take next?";
     const sections = [hook];
     if (second) sections.push(second);
-    else sections.push("The important thing is to connect the idea to a real situation, not leave it as a slogan.");
     sections.push(demonstrationFor(idea));
     sections.push(reflectionLine(idea));
     if (creatorLine) sections.push(creatorLine);
