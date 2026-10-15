@@ -95,7 +95,7 @@
     const sections = [hook];
     if (second) sections.push(second);
     else sections.push("The important thing is to connect the idea to a real situation, not leave it as a slogan.");
-    sections.push(action);
+    sections.push("For example, " + action.charAt(0).toLowerCase() + action.slice(1));
     if (creatorLine) sections.push(creatorLine);
     sections.push(close);
     return sections.join("\n\n");
