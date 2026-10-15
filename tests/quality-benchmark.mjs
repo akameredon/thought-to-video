@@ -49,6 +49,8 @@ for (const item of corpus) {
   if (item.format === "story") assert.ok(text.includes("STORY BUILDER"), item.id + ": story template must be clearly labelled as a builder");
   if (item.format === "lesson" && /price|pricing|service|cost/i.test(item.thought)) {
     assert.ok(text.includes("Worked example:"), item.id + ": pricing lesson should include a worked calculation");
+    assert.ok(text.includes("4,000 + (3 × 2,000) = 10,000"), item.id + ": pricing lesson should include the matching worked calculation");
+    assert.ok(!text.includes("weekly money review"), item.id + ": pricing lesson must not receive a budgeting demonstration");
   }
   if (item.format === "mini" || item.format === "course") {
     assert.ok(text.includes("Demonstration: Sample:") || text.includes("Demonstration: Worked example:"), item.id + ": course must include a concrete demonstration");
@@ -57,6 +59,14 @@ for (const item of corpus) {
     const demonstrations = Array.from(text.matchAll(/Demonstration: ([^\n]+)/g), match => match[1]);
     assert.equal(new Set(practices).size, practices.length, item.id + ": lesson practice tasks must be distinct");
     assert.equal(new Set(demonstrations).size, demonstrations.length, item.id + ": lesson demonstrations must be distinct");
+  }
+  if (item.id === "freelancer-boundaries") {
+    assert.ok(text.includes("edited 60-second video"), "freelancer lesson should show a scope-confirmation message");
+    assert.ok(!text.includes("4,000 + (3 × 2,000) = 10,000"), "freelancer lesson should not receive an unrelated pricing calculation");
+  }
+  if (item.id === "learning-ai") {
+    assert.ok(text.includes("Instead of asking an AI tool"), "AI video should use an AI-specific example");
+    assert.ok(!text.includes("learning a new skill"), "AI video should not route to the generic learning example");
   }
   if (item.format === "caption") {
     assert.ok(text.toLowerCase().includes("small businesses"), "caption should preserve the user's specific audience");
