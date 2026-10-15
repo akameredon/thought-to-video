@@ -15,7 +15,7 @@ const missingIds = [...new Set(referencedIds.filter((id) => !ids.includes(id)))]
 assert.deepEqual(missingIds, [], "all JavaScript-referenced element IDs must exist in HTML");
 
 for (const required of ["thought", "generate", "script", "enableCamera", "start", "stop", "playback"]) {
-  assert.ok(ids.includes(required), \`expected required app control: \${required}\`);
+  assert.ok(ids.includes(required), "expected required app control: " + required);
 }
 
 console.log("Smoke tests passed: JavaScript syntax, unique IDs, and referenced controls.");
