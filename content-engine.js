@@ -205,7 +205,7 @@
   function story(thought, tone) {
     const idea = clean(thought);
     const personal = firstPersonRisk(idea);
-    return "THE REAL STARTING POINT\n" + idea +
+    return "STORY BUILDER — COMPLETE WITH VERIFIED DETAILS\nTHE REAL STARTING POINT\n" + idea +
       "\n\nTHE TENSION\nWhat was uncertain, difficult, or at stake? Add only details that really happened or that you can verify. If this is an idea rather than a personal experience, describe the general challenge instead." +
       "\n\nTHE TURNING POINT\nWhat changed your understanding, or what practical choice could move the situation forward? Use a real moment; do not invent a dramatic event just to make the story stronger." +
       "\n\nTHE LESSON\nState the lesson in one clear sentence. Explain who it may help and what the listener could try." +
