@@ -63,8 +63,10 @@
     const lower = idea.toLowerCase();
     if (/\b(whatsapp|customer|client|sales|business|product|service)\b/.test(lower))
       return "Make the next step visible to the people you serve. Choose one customer-facing action, do it consistently, and notice the questions or responses it brings back.";
-    if (/\b(money|saving|budget|spend|income|cost|price|pricing|profit)\b/.test(lower))
-      return "Make the next step small enough to measure. Write down the number, date, or decision you want to track, then review the result before changing the plan.";
+    if (/\b(money|saving|budget|spending|income|cost|price|pricing|profit|expenses?|bills)\b/.test(lower))
+      return "Record one real amount and the date it applies to. Compare it with the plan you made, then decide whether the next step should change.";
+    if (/\b(movement|focus|progress|task|plan|time|consistent|consistency)\b/.test(lower))
+      return "Before you finish, write down the result you completed and the next action it makes possible. Use that evidence—not how busy the day felt—to plan tomorrow.";
     if (/\b(learn|learning|teach|student|skill|course|practice|practise|AI|programmer)\b/.test(lower))
       return "Turn the idea into a short practice session. Try one example yourself, check what worked, and explain the result in your own words before moving on.";
     if (/\b(content|post|video|creator|audience|social media)\b/.test(lower))
@@ -75,24 +77,24 @@
   }
   function demonstrationFor(idea) {
     const lower = idea.toLowerCase();
+    if (/\b(ai|programmer|prompt|technology)\b/.test(lower))
+      return "Instead of asking an AI tool to 'help with my business', describe one real task, the audience, the constraints, and the format you need. Then verify names, figures, and claims before using its answer.";
     if (/\b(whatsapp|customer|client|sales|business|product|shop)\b/.test(lower))
       return "For a shop using WhatsApp status, post one product photo with its price, availability, and a clear way to order. Track which questions customers ask so tomorrow's post answers a real question.";
     if (/\b(consisten|schedule|every day|posting)\b/.test(lower))
       return "If daily posting is unrealistic, choose two repeatable days each week and prepare a small batch in advance. Keep the schedule only if you can maintain useful quality without exhausting yourself.";
     if (/\b(money|saving|budget|income|price|pricing|profit|bill|expenses?|spending)\b/.test(lower))
       return "For a simple weekly money review, write down each expense for seven days, group essentials separately from optional spending, then choose one change you can realistically keep. Do not set a savings target until you know what is left after essential bills.";
-    if (/\b(education|learn|learning|teach|student|skill|course|practice|practise)\b/.test(lower))
+    if (/\b(learn|learning|teach|student|skill|course|practice|practise)\b/.test(lower))
       return "For example, if you are learning a new skill, practise one small task, compare your result with a clear standard, and note one thing to improve.";
-    if (/\b(ai|programmer|prompt|technology)\b/.test(lower))
-      return "Instead of asking an AI tool to 'help with my business', describe one real task, the audience, the constraints, and the format you need. Then verify names, figures, and claims before using its answer.";
     if (/\b(content|post|video|creator|audience|social media)\b/.test(lower))
       return "For a local business, plan one post that answers a customer question, one that demonstrates the product, and one that explains how to buy. Put each on the calendar only if it serves a clear audience need.";
-    if (/\b(movement|progress|focus|task|plan|time)\b/.test(lower))
-      return "Before opening messages or tutorials, write down the one deliverable that would make today successful. Work on it for a protected 25-minute block, then record whether the deliverable moved forward.";
     if (/\b(freelancer|deadline|revision|scope|payment)\b/.test(lower))
       return "Before starting a freelance job, send a short written agreement listing the deliverable, deadline, included revisions, payment schedule, and what counts as extra work. Ask the client to confirm it.";
     if (/\b(clean|street|resident|pickup|collection)\b/.test(lower))
       return "Residents could agree on a collection day, share the time and contact for missed pickups, and review after two weeks whether the arrangement reduced missed collections.";
+    if (/\b(movement|progress|focus|task|plan|time)\b/.test(lower))
+      return "Before opening messages or tutorials, write down the one deliverable that would make today successful. Work on it for a protected 25-minute block, then record whether the deliverable moved forward.";
     return "Choose one real situation where this idea applies. Write down the first action, the result you expect to see, and how you will check whether it worked.";
   }
   function practiceFor(idea) {
@@ -139,7 +141,7 @@
       : tone === "story"
         ? "Use the lesson only as far as your real experience supports it."
         : tone === "helpful"
-          ? "Use what happened to decide on your next step."
+          ? "At the end, ask: what changed because I took this step?"
           : "What is one realistic step you can take next?";
     const sections = [hook];
     if (second) sections.push(second);
