@@ -186,14 +186,79 @@
       const examples = [
         "Sample: write down the dates income is expected and the dates rent, transport, food, and other essential bills must be paid; leave unknown amounts blank until confirmed.",
         "Sample: mark food and required transport as essential for this exercise, while separating a non-urgent purchase for review. The categories depend on the learner's real needs.",
-        "Sample: record a real expense as date, item, amount, and category; use the amount actually paid, not an invented estimate.",
+        "Worked example (illustrative currency units): monthly income is 1,500; rent 600, food 250, transport 100, utilities 120, and phone 40. Listed essentials total 1,110, leaving 390 before any unlisted bills, debt payments, savings, or irregular costs. Replace every figure with confirmed personal amounts.",
         "Sample: compare the date a bill is due with the next expected income date. If income arrives later, identify the gap early and consider safe, realistic options.",
         "Sample: choose one flexible expense to examine, then compare its real cost with the value it provides before deciding whether to change it.",
-        "Sample: compare planned spending with the week's actual entries, explain any difference, and carry forward only a change that remains realistic."
+        "Answer check for the illustrative example: 600 + 250 + 100 + 120 + 40 = 1,110; 1,500 - 1,110 = 390 remaining before unlisted costs. If any bill or income figure is unknown, mark it unknown rather than treating this remainder as spendable money."
       ];
       return examples[index % examples.length];
     }
     return "Worked example: model the task described in this lesson using a clearly identified sample. Explain each decision, state any assumptions, and show learners how to check the result.";
+  }
+  function coursePractice(topic, index, lesson) {
+    const lower = topic.toLowerCase();
+    if (/content|social media|post|creator|audience/.test(lower)) {
+      const tasks = [
+        "Write a profile of one real audience group and list three questions you have actually heard or can verify.",
+        "Draft three one-sentence post ideas: one answers a question, one demonstrates the offer, and one explains how to buy.",
+        "Turn one audience question into a post with a clear answer, one verified detail, and one next step.",
+        "Place your three drafts on a seven-day calendar; leave space blank when you have no useful message to publish.",
+        "Edit one draft with a checklist: clear audience, accurate details, one main point, and one action.",
+        "Review a sample week of enquiries or questions; identify one pattern and write the next post that responds to it."
+      ];
+      return tasks[index % tasks.length];
+    }
+    if (/budget|spending|bills|saving|income|money/.test(lower)) {
+      const tasks = [
+        "Create a table of expected income and essential bills, including each due date; mark uncertain figures as unknown.",
+        "Classify five real or clearly labelled sample expenses as essential or flexible and explain one borderline choice.",
+        "Record three transactions with date, item, amount, and category; calculate their total without estimating missing values.",
+        "Choose one bill and compare its due date with the next confirmed income date; write down the size of any timing gap.",
+        "Review one flexible expense and compare its actual cost with the value it provides before deciding whether to change it.",
+        "Compare planned and actual amounts, calculate the difference for one category, and name one realistic adjustment."
+      ];
+      return tasks[index % tasks.length];
+    }
+    const general = [
+      "Write the starting problem in one sentence and define an observable result that would count as success.",
+      "Explain the key terms in your own words and give one example that fits the lesson.",
+      "Follow the process with a small sample case and record the decisions you made at each step.",
+      "Compare a strong example with a common mistake; correct the mistake and explain why your correction is better.",
+      "Apply the process to a new case without copying the demonstration, then save the result as evidence.",
+      "Check your result against the original goal, identify one gap, and write the next improvement you would test."
+    ];
+    return general[index % general.length];
+  }
+  function courseCheck(topic, index, total) {
+    const lower = topic.toLowerCase();
+    if (/content|social media|post|creator|audience/.test(lower)) {
+      return [
+        "Can the learner name one specific audience and support the choice with a real question or need?",
+        "Do the three post ideas serve different purposes rather than repeat the same message?",
+        "Does the draft answer the question, use verified details, and give one clear next step?",
+        "Does the calendar vary the purpose of posts and avoid publishing merely to fill every day?",
+        "Can a reader identify the main point and next step without guessing at price or availability?",
+        "Can the learner identify one useful audience signal and turn it into a specific next post?"
+      ][index % 6];
+    }
+    if (/budget|spending|bills|saving|income|money/.test(lower)) {
+      return [
+        "Are income and bills listed with dates, and are unknown amounts clearly marked?",
+        "Can the learner explain why each sample expense was placed in its category?",
+        "Do the recorded transactions add up correctly, with no guessed figures?",
+        "Can the learner state the timing gap using confirmed dates and amounts?",
+        "Is the proposed change realistic and does it avoid ignoring essential needs?",
+        "Can the learner calculate one planned-versus-actual difference and explain the next decision?"
+      ][index % 6];
+    }
+    return [
+      "Can the learner state the problem and describe an observable successful result?",
+      "Can the learner define the key terms and give a relevant example?",
+      "Can the learner complete the process in order and explain the decisions?",
+      "Can the learner correct the common mistake and explain why it was wrong?",
+      "Can the learner apply the method to a new case without copying the example?",
+      "Can the learner compare the result with the goal and identify one improvement?"
+    ][index % 6];
   }
   function course(thought, full) {
     const topic = clean(thought).replace(/[.!?]+$/, "");
@@ -242,12 +307,8 @@
       out += "\n\nLESSON " + (index + 1) + ": " + lesson[0] +
         "\nOutcome: " + lesson[1] +
         "\nDemonstration: " + courseDemonstration(topic, lesson, index) +
-        "\nPractice: Complete this task: " + lesson[1] +
-        "\nCheck: " + (index === 0
-          ? "Can the learner show the starting information and explain what is known versus unknown?"
-          : index === lessons.length - 1
-            ? "Can the learner explain what changed, support the conclusion with their own records, and name one next improvement?"
-            : "Can the learner complete the task without copying the example and explain why the chosen step fits the goal?");
+        "\nPractice: " + coursePractice(topic, index, lesson) +
+        "\nCheck: " + courseCheck(topic, index, lessons.length);
     });
     return out + "\n\nFINAL PROJECT\nComplete one small real-world task related to " + topic + ". Include the starting point, the steps taken, the result, and one improvement for a second attempt." +
       "\n\nASSESSMENT CHECKLIST\n1. Can the learner explain the main idea in their own words?\n2. Can they demonstrate the process without copying every line?\n3. Does their result meet the stated outcome?\n4. Can they identify one mistake and how to correct it?" +
@@ -302,7 +363,7 @@
     return { script, caption: caption(thought), format, componentCount: components.length };
   }
   root.TTVContentEngine = {
-    version: "1.4.3", componentCount: components.length, components: components.slice(), generate,
+    version: "1.5.0", componentCount: components.length, components: components.slice(), generate,
     component: (family, seed) => component(clean(family), clean(seed)),
     caption: raw => caption(clean(raw)), video: (raw, tone, creator) => video(raw, tone, creator),
     course: (raw, full) => course(raw, full), story: (raw, tone) => story(raw, tone), lesson: raw => lesson(raw)
