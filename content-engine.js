@@ -65,9 +65,9 @@
     const lower = idea.toLowerCase();
     if (/\b(whatsapp|customer|client|sales|business|product|service)\b/.test(lower))
       return "Make the next step visible to the people you serve. Choose one customer-facing action, do it consistently, and notice the questions or responses it brings back.";
-    if (/\b(money|saving|budget|spending|income|cost|price|pricing|profit|expenses?|bills)\b/.test(lower))
-      return "Record one real amount and the date it applies to. Compare it with the plan you made, then decide whether the next step should change.";
     if (/\b(movement|focus|progress|task|plan|time|consistent|consistency)\b/.test(lower))
+      return "Before you finish, write down the result you completed and the next action it makes possible. Use that evidence—not how busy the day felt—to plan tomorrow.";
+    if (/\b(money|saving|budget|spending|income|cost|price|pricing|profit|expenses?|bills)\b/.test(lower))
       return "Before you finish, write down the result you completed and the next action it makes possible. Use that evidence—not how busy the day felt—to plan tomorrow.";
     if (/\b(learn|learning|teach|student|skill|course|practice|practise|AI|programmer)\b/.test(lower))
       return "Turn the idea into a short practice session. Try one example yourself, check what worked, and explain the result in your own words before moving on.";
@@ -81,10 +81,10 @@
     const lower = idea.toLowerCase();
     if (/\b(ai|programmer|prompt|technology)\b/.test(lower))
       return "Instead of asking an AI tool to 'help with my business', describe one real task, the audience, the constraints, and the format you need. Then verify names, figures, and claims before using its answer.";
-    if (/\b(whatsapp|customer|client|sales|business|product|shop)\b/.test(lower))
-      return "For a shop using WhatsApp status, post one product photo with its price, availability, and a clear way to order. Track which questions customers ask so tomorrow's post answers a real question.";
     if (/\b(consisten|schedule|every day|posting)\b/.test(lower))
       return "If daily posting is unrealistic, choose two repeatable days each week and prepare a small batch in advance. Keep the schedule only if you can maintain useful quality without exhausting yourself.";
+    if (/\b(whatsapp|customer|client|sales|business|product|shop)\b/.test(lower))
+      return "For a shop using WhatsApp status, post one product photo with its price, availability, and a clear way to order. Track which questions customers ask so tomorrow's post answers a real question.";
     if (/\b(money|saving|budget|income|price|pricing|profit|bill|expenses?|spending)\b/.test(lower))
       return "For a simple weekly money review, write down each expense for seven days, group essentials separately from optional spending, then choose one change you can realistically keep. Do not set a savings target until you know what is left after essential bills.";
     if (/\b(learn|learning|teach|student|skill|course|practice|practise)\b/.test(lower))
@@ -101,14 +101,14 @@
   }
   function practiceFor(idea) {
     const lower = idea.toLowerCase();
+    if (/\b(freelancer|deadline|revision|scope|payment)\b/.test(lower))
+      return "Practice: write a project-confirmation message with the deliverable, deadline, number of revisions, payment terms, and how extra requests will be handled.";
     if (/\b(price|pricing|service|cost|time|market)\b/.test(lower))
       return "Practice: price one service. List direct costs, estimate hours, choose a rate for that time, check comparable offers, and write exactly what the customer receives. Review whether the price covers the costs and time.";
     if (/\b(budget|spending|bills|saving|income)\b/.test(lower))
       return "Practice: create a one-week tracker with columns for date, item, amount, and essential or optional. Add the expenses you know, then update it daily and review the totals at week's end.";
     if (/\b(content|social media|post|creator|audience)\b/.test(lower))
       return "Practice: draft a seven-day content plan. For each day, write the audience question, one key message, the format, and the next step you want the audience to take. Remove posts that repeat the same purpose.";
-    if (/\b(freelancer|deadline|revision|scope|payment)\b/.test(lower))
-      return "Practice: write a project-confirmation message with the deliverable, deadline, number of revisions, payment terms, and how extra requests will be handled.";
     return "Practice: complete one small real-world task related to the idea. Save the result and note what you would change on a second attempt.";
   }
   function reflectionLine(idea) {
@@ -131,9 +131,9 @@
       return "A clear prompt narrows the task; a quick fact-check catches confident mistakes before they reach a customer or audience.";
     if (/\b(whatsapp|customer|client|sales|business|product|shop)\b/.test(lower))
       return "A useful status answers a real customer question; posting more often is not helpful if people still cannot tell what is available or how to order.";
-    if (/\b(money|saving|budget|spending|income|cost|price|pricing|profit|expenses?|bills)\b/.test(lower))
-      return "Seven days gives you a first snapshot, not a complete financial picture. Use the record as a starting point and avoid setting a target from guesses.";
     if (/\b(consisten|schedule|every day|posting)\b/.test(lower))
+      return "A smaller schedule you can sustain is more useful than a demanding schedule you abandon after a week.";
+    if (/\b(money|saving|budget|spending|income|cost|price|pricing|profit|expenses?|bills)\b/.test(lower))
       return "A smaller schedule you can sustain is more useful than a demanding schedule you abandon after a week.";
     if (/\b(movement|progress|focus|task|plan|time)\b/.test(lower))
       return "A finished deliverable gives you something to evaluate. A full inbox or a long list of watched tutorials does not prove the important task moved forward.";
