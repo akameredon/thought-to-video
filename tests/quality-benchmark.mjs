@@ -46,11 +46,20 @@ for (const item of corpus) {
   assert.deepEqual(missingSections, [], item.id + ": required format structure is missing");
   assert.equal(genericPhraseHits, 0, item.id + ": known boilerplate phrase remains");
   assert.equal(missingConcreteExample, false, item.id + ": video must contain a concrete, topic-aware example");
-  if (item.format === "story") assert.ok(text.includes("STORY BUILDER"), item.id + ": story template must be clearly labelled as a builder");
+  if (item.format === "story" && item.id === "personal-story") {
+    assert.ok(text.includes("STORY DRAFT — BUILT ONLY FROM YOUR SUPPLIED DETAILS"), "personal story should become a cautious draft from supplied facts");
+    assert.ok(text.includes("BEFORE PUBLISHING"), "personal story should include a truth-check before publication");
+  }
+  if (item.format === "story" && item.id !== "personal-story") assert.ok(text.includes("STORY BUILDER"), item.id + ": story template must be clearly labelled as a builder");
   if (item.format === "lesson" && /price|pricing|service|cost/i.test(item.thought)) {
     assert.ok(text.includes("Worked example:"), item.id + ": pricing lesson should include a worked calculation");
     assert.ok(text.includes("4,000 + (3 × 2,000) = 10,000"), item.id + ": pricing lesson should include the matching worked calculation");
     assert.ok(!text.includes("weekly money review"), item.id + ": pricing lesson must not receive a budgeting demonstration");
+  }
+  if (item.id === "full-course-budget") {
+    assert.ok(text.includes("monthly income is 1,500"), "budget course should include explicitly illustrative amounts");
+    assert.ok(text.includes("1,500 - 1,110 = 390"), "budget course should include checked arithmetic");
+    assert.ok(text.includes("Replace every figure with confirmed personal amounts"), "budget example must warn learners to use confirmed figures");
   }
   if (item.format === "mini" || item.format === "course") {
     assert.ok(text.includes("Demonstration: Sample:") || text.includes("Demonstration: Worked example:"), item.id + ": course must include a concrete demonstration");
@@ -77,7 +86,7 @@ const videoRows = rows.filter(row => row.format === "video");
 const avgVideoWords = videoRows.reduce((sum, row) => sum + row.words, 0) / Math.max(1, videoRows.length);
 const passRate = rows.filter(row => row.passed).length / rows.length;
 console.log(JSON.stringify({
-  benchmarkVersion: "1.4.3",
+  benchmarkVersion: "1.5.0",
   engineVersion: engine.version,
   componentCount: engine.componentCount,
   corpusCases: corpus.length,
