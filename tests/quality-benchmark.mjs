@@ -72,6 +72,14 @@ for (const item of corpus) {
   if (item.id === "freelancer-boundaries") {
     assert.ok(text.includes("edited 60-second video"), "freelancer lesson should show a scope-confirmation message");
     assert.ok(!text.includes("4,000 + (3 × 2,000) = 10,000"), "freelancer lesson should not receive an unrelated pricing calculation");
+    assert.ok(text.includes("Practice: write a project-confirmation message"), "freelancer practice must rehearse scope confirmation");
+    assert.ok(!text.includes("Practice: price one service"), "freelancer practice must not be routed to generic pricing");
+  }
+  if (item.id === "creator-consistency") {
+    assert.ok(text.includes("A smaller schedule you can sustain"), "consistency video should reinforce a sustainable schedule");
+    assert.ok(!text.includes("weekly money review"), "consistency video must not use a budgeting example");
+    assert.ok(!text.includes("financial picture"), "consistency video must not use financial supporting detail");
+    assert.ok(!text.includes("savings target"), "consistency video must not use savings advice");
   }
   if (item.id === "learning-ai") {
     assert.ok(text.includes("Instead of asking an AI tool"), "AI video should use an AI-specific example");
@@ -86,7 +94,7 @@ const videoRows = rows.filter(row => row.format === "video");
 const avgVideoWords = videoRows.reduce((sum, row) => sum + row.words, 0) / Math.max(1, videoRows.length);
 const passRate = rows.filter(row => row.passed).length / rows.length;
 console.log(JSON.stringify({
-  benchmarkVersion: "1.5.0",
+  benchmarkVersion: "1.5.1",
   engineVersion: engine.version,
   componentCount: engine.componentCount,
   corpusCases: corpus.length,
