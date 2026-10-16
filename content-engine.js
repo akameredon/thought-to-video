@@ -319,7 +319,9 @@
     const personal = firstPersonRisk(idea);
     if (personal) {
       return "STORY DRAFT — BUILT ONLY FROM YOUR SUPPLIED DETAILS\\n" +
-        "OPENING\\n" + idea +
+        "THE REAL STARTING POINT\\n" + idea +
+        "\\n\\nTHE TENSION\\n" +
+        "Name what felt difficult or uncertain, using only what you supplied. Add a real detail if you want this section to feel more personal." +
         "\\n\\nTHE STORY IN PLAIN LANGUAGE\\n" +
         "You held back because you wanted the work or situation to be right. The detail you supplied is that feedback helped more than waiting alone. Keep the draft focused on that contrast; add the actual moment you shared the work and the feedback you received only if you can verify those details." +
         "\\n\\nTHE TURNING POINT — ADD THE REAL DETAIL\\n" +
