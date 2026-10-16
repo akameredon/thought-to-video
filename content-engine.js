@@ -317,6 +317,18 @@
   function story(thought, tone) {
     const idea = clean(thought);
     const personal = firstPersonRisk(idea);
+    if (personal) {
+      return "STORY DRAFT — BUILT ONLY FROM YOUR SUPPLIED DETAILS\\n" +
+        "OPENING\\n" + idea +
+        "\\n\\nTHE STORY IN PLAIN LANGUAGE\\n" +
+        "You held back because you wanted the work or situation to be right. The detail you supplied is that feedback helped more than waiting alone. Keep the draft focused on that contrast; add the actual moment you shared the work and the feedback you received only if you can verify those details." +
+        "\\n\\nTHE TURNING POINT — ADD THE REAL DETAIL\\n" +
+        "What made you decide to share it? What did someone actually say or do? Add one specific, truthful detail here rather than inventing a dramatic scene." +
+        "\\n\\nTHE LESSON\\n" +
+        "Waiting for perfection can delay useful feedback. Share a version that is ready enough, then use real feedback to improve the next version." +
+        "\\n\\nBEFORE PUBLISHING\\n" +
+        "Check that the order of events and every first-person claim are accurate. Remove any sentence that describes something you did not experience.";
+    }
     return "STORY BUILDER — COMPLETE WITH VERIFIED DETAILS\nTHE REAL STARTING POINT\n" + idea +
       "\n\nTHE TENSION\nWhat was uncertain, difficult, or at stake? Add only details that really happened or that you can verify. If this is an idea rather than a personal experience, describe the general challenge instead." +
       "\n\nTHE TURNING POINT\nWhat changed your understanding, or what practical choice could move the situation forward? Use a real moment; do not invent a dramatic event just to make the story stronger." +
