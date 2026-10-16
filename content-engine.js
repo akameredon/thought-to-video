@@ -377,7 +377,7 @@
     return { script, caption: caption(thought), format, componentCount: components.length };
   }
   root.TTVContentEngine = {
-    version: "1.5.0", componentCount: components.length, components: components.slice(), generate,
+    version: "1.5.1", componentCount: components.length, components: components.slice(), generate,
     component: (family, seed) => component(clean(family), clean(seed)),
     caption: raw => caption(clean(raw)), video: (raw, tone, creator) => video(raw, tone, creator),
     course: (raw, full) => course(raw, full), story: (raw, tone) => story(raw, tone), lesson: raw => lesson(raw)
