@@ -143,3 +143,21 @@ Updated on 2026-10-16. This pass addresses the two weakest areas identified abov
 The smoke-test step passed on the first CI run for this pass, but the expanded quality benchmark then failed because the story-routing condition incorrectly treated a collective community statement as a personal story. That routing condition was corrected. The latest branch commit is `9bea7894902c01f8732a404178dc0eb63a980447`; a passing workflow for that exact commit has not yet been confirmed, so the current test status is **pending verification**, not passed.
 
 The manual quality gate remains open. These code changes improve course tasks and the personal-story starting draft, but they do not establish that the full engine reaches the 32/40 average release target or that users would publish outputs without significant edits. Community stories still need real turning-point details from the user, and a full course still needs subject-matter review before it is taught as a finished course.
+
+## Follow-up routing fixes — engine 1.5.1
+
+Updated on 2026-10-16 after reviewing the actual output from all 12 corpus cases.
+
+- Fixed a keyword collision where the phrase “at any cost” sent a consistency video into budgeting advice. Consistency-related routing now takes priority, and the output reinforces a sustainable publishing schedule instead of discussing savings or a financial snapshot.
+- Fixed freelancer lesson practice routing: the word “time” previously triggered generic service-pricing practice. Freelancer lessons now ask learners to draft a project-confirmation message covering deliverable, deadline, revisions, payment terms, and extra requests.
+- Helpful-tone video endings now use an idea-specific next action rather than the same generic question across videos.
+- Added regression checks for all three issues.
+
+Validation for branch head `20771270058e35fc0e68ee57249f1d977b297de4`:
+- GitHub Actions smoke tests: passed.
+- Quality benchmark 1.5.1: passed, 12/12 corpus cases (100% automated pass rate).
+- Registered components: 1,000.
+- Average generated video length in the benchmark: 118 words. Individual scripts vary by idea; keep clarity ahead of mechanically filling a word target.
+- Deploy Preview generated for the latest commit: https://deploy-preview-3--thought-to-video.netlify.app
+
+The manual quality gate is still open. These regression tests verify known routing and structure issues, not the overall 32/40 manual quality target, factual accuracy in every possible topic, or readiness for a broad release. The PR remains open and unmerged.
