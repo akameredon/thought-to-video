@@ -50,6 +50,9 @@ for (const item of corpus) {
     assert.ok(text.includes("STORY DRAFT — BUILT ONLY FROM YOUR SUPPLIED DETAILS"), "personal story should become a cautious draft from supplied facts");
     assert.ok(text.includes("BEFORE PUBLISHING"), "personal story should include a truth-check before publication");
   }
+  if (item.format === "video") {
+    assert.ok(!text.includes("At the end, ask: what changed because I took this step?"), item.id + ": video close must be topic-specific");
+  }
   if (item.format === "story" && item.id !== "personal-story") assert.ok(text.includes("STORY BUILDER"), item.id + ": story template must be clearly labelled as a builder");
   if (item.format === "lesson" && /price|pricing|service|cost/i.test(item.thought)) {
     assert.ok(text.includes("Worked example:"), item.id + ": pricing lesson should include a worked calculation");
