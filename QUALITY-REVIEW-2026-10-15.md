@@ -125,3 +125,21 @@ The following scores are a **provisional model-assisted re-score**, not independ
 2. Offer story modes that distinguish a personal story (requires verified details) from a general illustrative narrative, without inventing a user's lived experience.
 3. Expand short video scripts only when the original idea supports a useful explanation, counterexample, or decision rule; do not pad to hit a word count.
 4. Add a manual review with real creators before declaring the manual quality gate passed.
+
+## Course and story quality pass — engine 1.5.0
+
+Updated on 2026-10-16. This pass addresses the two weakest areas identified above: course practice that merely repeated lesson outcomes, and personal-story output that was too much of a worksheet.
+
+### Changes implemented
+
+- Added distinct, observable practice tasks and topic-matched checks for each content-planning and budgeting lesson. General-topic courses also receive a progression from defining success to practising, correcting a mistake, and reviewing evidence.
+- Added an explicitly illustrative budget worked example: income 1,500 units; listed essentials 1,110; apparent remainder 390 before unlisted bills, debt, savings, irregular costs, or other commitments. The example tells learners to replace every amount with confirmed figures and not to treat the remainder as automatically spendable.
+- Added an arithmetic answer check for the worked budget example.
+- Personal-story prompts that use “I”, “my”, or “me” now receive a more usable draft built only from supplied details, plus a clear prompt to add the real turning point and verify the sequence before publishing. Collective/community statements remain in the labelled Story Builder flow so they are not mistakenly treated as personal anecdotes.
+- Expanded the regression benchmark to check the budget arithmetic, fact-check reminder, and story mode labels.
+
+### Validation status
+
+The smoke-test step passed on the first CI run for this pass, but the expanded quality benchmark then failed because the story-routing condition incorrectly treated a collective community statement as a personal story. That routing condition was corrected. The latest branch commit is `9bea7894902c01f8732a404178dc0eb63a980447`; a passing workflow for that exact commit has not yet been confirmed, so the current test status is **pending verification**, not passed.
+
+The manual quality gate remains open. These code changes improve course tasks and the personal-story starting draft, but they do not establish that the full engine reaches the 32/40 average release target or that users would publish outputs without significant edits. Community stories still need real turning-point details from the user, and a full course still needs subject-matter review before it is taught as a finished course.
