@@ -159,7 +159,7 @@
       : tone === "story"
         ? "Use the lesson only as far as your real experience supports it."
         : tone === "helpful"
-          ? "At the end, ask: what changed because I took this step?"
+          ? actionLine(idea)
           : "What is one realistic step you can take next?";
     const sections = [hook];
     if (second) sections.push(second);
