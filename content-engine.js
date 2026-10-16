@@ -316,7 +316,7 @@
   }
   function story(thought, tone) {
     const idea = clean(thought);
-    const personal = /\\b(i|my|me)\\b/i.test(idea);
+    const personal = /\b(i|my|me)\b/i.test(idea);
     if (personal) {
       return "STORY DRAFT — BUILT ONLY FROM YOUR SUPPLIED DETAILS\\n" +
         "THE REAL STARTING POINT\\n" + idea +
